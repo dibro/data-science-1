@@ -1,0 +1,67 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Ferien:
+2014: 14.07.-24.08. KW: 29-34
+2015: 20.07.-30.08. KW: 30-35
+2016: 25.07.-04.09. KW: 30-35
+2017: 24.07.-03.09. KW: 30-35
+2018: 09.07.-19.08. KW: 28-33
+
+```{r}
+library(readr)
+library(lubridate)
+
+#Laden der Daten und erstellen der benötigten Zeilen
+umsatzdaten <- read_csv("umsatzdaten_gekuerzt.csv")
+umsatzdaten$Jahr<- year(as.POSIXlt(umsatzdaten$Datum, format="%Y-%m-%d"))
+umsatzdaten$Woche <- strftime(as.Date(umsatzdaten$Datum),format="%V")
+
+#Erstellen der Daten zu Ferien
+ferien_1=numeric(52)+1
+for(j in 29:34){
+  ferien_1[j]=2
+}
+ferien_234=numeric(52)+1
+for(j in 30:35){
+  ferien_234[j]=2
+}
+ferien_5=numeric(52)+1
+for(j in 28:33){
+  ferien_5[j]=2
+}
+ferien=cbind(ferien_1,ferien_234,ferien_234,ferien_234,ferien_5)
+
+#Wählen Warengruppe und Jahren
+years=c(2014,2015,2016,2017,2018)
+selected_group=1
+
+
+for(i in 1:5){
+  #Auswählen der Daten für passende Warengruppe und Jahr, abschneiden der 53. Woche um Fehler zu vermeiden
+  selected_data <- umsatzdaten$Warengruppe==selected_group & umsatzdaten$Jahr==years[i] & umsatzdaten$Woche<53
+  #Gruppieren nach Woche, berechnen der Durchschnitte
+my_sum <- umsatzdaten[selected_data,] %>%
+  group_by(Woche) %>%
+  summarise(
+    n=n(),
+    mean=mean(Umsatz),
+  )
+  #Erstellen der Daten zum Darstellen
+  plot_data=data.frame(Woche=my_sum$Woche,umsatz=my_sum$mean) 
+    #Erstellen des Plots, Füllfarbe der Ferien
+    plot<-ggplot(data=plot_data, aes(x=Woche,y=umsatz))+ geom_bar(stat="identity", position=position_dodge(),fill=ferien[,i])+ labs(x="Woche",y="Umsatz", title = paste("Warengruppe",selected_group,", Jahr",years[i]))
+  print(plot)
+}
+
+
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.

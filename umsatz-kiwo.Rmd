@@ -1,0 +1,47 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+
+```{r}
+library(readr)
+library(lubridate)
+
+#Laden der Daten und erstellen der benötigten Zeilen
+umsatzdaten <- read_csv("umsatzdaten_gekuerzt.csv")
+umsatzdaten$Wochentag <- weekdays(as.Date(umsatzdaten$Datum))
+umsatzdaten$Monat<- month(as.POSIXlt(umsatzdaten$Datum, format="%Y-%m-%d"))
+umsatzdaten$Jahr<- year(as.POSIXlt(umsatzdaten$Datum, format="%Y-%m-%d"))
+kiwo<-read_csv("kiwo.csv")
+
+#Zusammenfügen der Daten und Ersetzen der NA durch 0
+umsatz_kiwo <- left_join(umsatzdaten,kiwo)
+umsatz_kiwo[is.na(umsatz_kiwo)]<-0
+#Festlegen von Jahr und Warengruppe. Bitte gewünschte Warengruppe wählen
+years=c(2014,2015,2016,2017,2018)
+selected_group=1
+
+#Schleife für die verschiedenen Jahre
+for(i in 1:5){
+  #Array für das Auswählen der Daten: Daten werden ausgewählt, wenn Warengruppe der gewünschten entspricht, das Jahr das richtige ist und der Monat Juni oder Juli ist
+  selected_data=umsatz_kiwo$Warengruppe==selected_group & umsatz_kiwo$Jahr==years[i] & (umsatz_kiwo$Monat==6|umsatz_kiwo$Monat==7)
+   
+  #Zusammenfügen der benötigten Daten zum plotten, Datum, Umsatz und KielerWoche für das Füllen der Balken
+  plot_data=data.frame(Datum=umsatz_kiwo[selected_data,]$Datum,umsatz=umsatz_kiwo[selected_data,]$Umsatz,wochentag=umsatz_kiwo[selected_data,]$Wochentag,KielerWoche=umsatz_kiwo[selected_data,]$KielerWoche) 
+  
+  #Erstellen des Plots, Umrandung entspricht Wochentag, Füllfarbe der Kieler Woche
+  plot<-ggplot(data=plot_data, aes(x=Datum,y=umsatz, color = wochentag))+ geom_bar(stat="identity", position=position_dodge(),fill = umsatz_kiwo[selected_data,]$KielerWoche+1)+ labs(x="Datum",y="Umsatz", title = paste("Warengruppe",selected_group,", Jahr",years[i]))
+       
+  #Darstellen des Plots                                                                                                    
+  print(plot)
+}
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
