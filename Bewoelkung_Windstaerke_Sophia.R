@@ -1,4 +1,4 @@
-#Zusammenfassung:
+###Zusammenfassung:
 #Bewölkung ist eine gute Variable zur Vorhersage vom Umsatz (pro Warengruppe)
 #Windgeschwindigkeit ist eine schlechte Variable zur Vorhersage vom Umsatz (pro Warengruppe)
 
