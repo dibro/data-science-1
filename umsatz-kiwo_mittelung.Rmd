@@ -1,0 +1,129 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Wochen:
+2014: 25-26
+2015: 25-26
+2016: 24-25
+2017: 24-25
+2018: 24-25
+
+
+```{r}
+library(readr)
+library(lubridate)
+library(dplyr)
+library(ggplot2)
+
+#Laden der Daten und erstellen der benötigten Zeilen
+umsatzdaten <- read_csv("umsatzdaten_gekuerzt.csv")
+umsatzdaten$Wochentag <- weekdays(as.Date(umsatzdaten$Datum))
+umsatzdaten$Monat<- month(as.POSIXlt(umsatzdaten$Datum, format="%Y-%m-%d"))
+umsatzdaten$Jahr<- year(as.POSIXlt(umsatzdaten$Datum, format="%Y-%m-%d"))
+umsatzdaten$Woche <- strftime(as.Date(umsatzdaten$Datum),format="%V")
+kiwo<-read_csv("kiwo.csv")
+
+
+#Zusammenfügen der Daten und Ersetzen der NA durch 0
+umsatz_kiwo <- left_join(umsatzdaten,kiwo)
+umsatz_kiwo[is.na(umsatz_kiwo)]<-0
+
+#Festlegen der Wochen der Kiwo für Wochenende und Wochentage
+kiwos=cbind(c(25,26),c(25,26),c(24,25),c(24,25),c(24,25))
+wkiwos=cbind(c(26,26,25,25,25))
+
+#Festlegen von Jahr
+years=c(2014,2015,2016,2017,2018)
+
+#Schleife über die Warengruppen
+for(selected_group in 1:5){
+#Auswählen der Wochen für das erste Jahre
+selected_data=umsatz_kiwo$Warengruppe==selected_group & umsatz_kiwo$Jahr==years[1] & umsatz_kiwo$Woche >=kiwos[1,1]-3 & umsatz_kiwo$Woche <=kiwos[2,1]+3 & (umsatz_kiwo$Wochentag == "Sonntag" | umsatz_kiwo$Wochentag == "Samstag")
+  my_sum <-umsatz_kiwo[selected_data,] %>%
+  group_by(Woche) %>%
+  summarise(
+    n=n(),
+    mean=mean(Umsatz),
+  )
+  my_sum$Woche=c(1:8)
+  kiwo_daten=my_sum
+  #Auswählen der Daten für die anderen Jahre
+for(i in 2:5){
+  selected_data=umsatz_kiwo$Warengruppe==selected_group & umsatz_kiwo$Jahr==years[i] & umsatz_kiwo$Woche >=kiwos[1,i]-3 & umsatz_kiwo$Woche <=kiwos[2,i]+3 & (umsatz_kiwo$Wochentag == "Sonntag" | umsatz_kiwo$Wochentag == "Samstag")
+  my_sum <-umsatz_kiwo[selected_data,] %>%
+  group_by(Woche) %>%
+  summarise(
+    n=n(),
+    mean=mean(Umsatz),
+  )
+  my_sum$Woche=c(1:8)
+  kiwo_daten=rbind(kiwo_daten,my_sum)
+}
+
+#Gruppieren über die Jahre
+my_sum2 <- kiwo_daten %>%
+  group_by(Woche) %>%
+  summarise(
+    n=n(),
+    mean=mean(mean),
+  )
+
+  #Zusammenfügen der benötigten Daten zum plotten, Datum, Umsatz und KielerWoche für das Füllen der Balken
+  
+  plot_data=data.frame(Woche=my_sum2$Woche,umsatz=my_sum2$mean) 
+  
+  #Erstellen des Plots, Umrandung entspricht Wochentag, Füllfarbe der Kieler Woche
+  plot<-ggplot(data=plot_data, aes(x=Woche,y=umsatz))+ geom_bar(stat="identity", position=position_dodge(),fill = c(1,1,1,2,2,1,1,1))+ labs(x="Datum",y="Umsatz", title = paste("Warengruppe",selected_group,"Wochenende"))
+  
+  #Darstellen des Plots                                                                                                    
+  print(plot)
+
+  
+  #Analoge Durchführung für die Arbeitswoche
+  selected_data=umsatz_kiwo$Warengruppe==selected_group & umsatz_kiwo$Jahr==years[1] & umsatz_kiwo$Woche >=kiwos[1]-3 & umsatz_kiwo$Woche <=kiwos[1]+3  & (umsatz_kiwo$Wochentag != "Sonntag" | umsatz_kiwo$Wochentag != "Samstag")
+  my_sum <- umsatz_kiwo[selected_data,] %>%
+  group_by(Woche) %>%
+  summarise(
+    n=n(),
+    mean=mean(Umsatz),
+  )
+  my_sum$Woche=c(1:7)
+  wkiwo_daten=my_sum
+for(i in 2:5){
+  selected_data=umsatz_kiwo$Warengruppe==selected_group & umsatz_kiwo$Jahr==years[i] & umsatz_kiwo$Woche >=kiwos[i]-3 & umsatz_kiwo$Woche <=kiwos[i]+3  & (umsatz_kiwo$Wochentag != "Sonntag" | umsatz_kiwo$Wochentag != "Samstag")
+  my_sum <- umsatz_kiwo[selected_data,] %>%
+  group_by(Woche) %>%
+  summarise(
+    n=n(),
+    mean=mean(Umsatz),
+  )
+  my_sum$Woche=c(1:7)
+  wkiwo_daten=my_sum
+  
+}
+  
+  my_sum2 <- wkiwo_daten %>%
+  group_by(Woche) %>%
+  summarise(
+    n=n(),
+    mean=mean(mean),
+  )
+  #Zusammenfügen der benötigten Daten zum plotten, Datum, Umsatz und KielerWoche für das Füllen der Balken
+  plot_data=data.frame(Woche=my_sum2$Woche,umsatz=my_sum2$mean) 
+  
+  #Erstellen des Plots, Umrandung entspricht Wochentag, Füllfarbe der Kieler Woche
+  plot<-ggplot(data=plot_data, aes(x=Woche,y=umsatz))+ geom_bar(stat="identity", position=position_dodge(),fill = c(1,1,1,2,1,1,1))+ labs(x="Datum",y="Umsatz", title = paste("Warengruppe",selected_group,"Woche"))
+  
+  #Darstellen des Plots                                                                                                    
+  print(plot)
+}
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
