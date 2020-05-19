@@ -1,0 +1,77 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+Warengruppen:
+1 Brot
+2 Brötchen
+3 Croissant 
+4 Konditorei 
+5 Kuchen
+6 Saisonbrot
+
+```{r}
+library(readr)
+library(lubridate)
+library(ggplot2)
+library(dplyr)
+library(patchwork) # To display 2 charts together
+
+umsatzdaten <- read_csv("umsatzdaten_gekuerzt.csv")
+
+wetterdaten <- read_csv("wetter.csv")
+
+umsatz_wetter_daten <- left_join(umsatzdaten, wetterdaten)
+
+
+
+for (i in 1:6) {
+  umsatz_wetter_daten_wg <- umsatz_wetter_daten[umsatz_wetter_daten$Warengruppe == i,]
+  
+  
+  
+  # A few constants
+  temperatureColor <- "#69b3a2"
+  umsatzColor <- rgb(0.2, 0.6, 0.9, 1)
+  
+  # Value used to transform the data
+  coeff <- 10
+   
+  p <- ggplot(umsatz_wetter_daten_wg, aes(x=Datum)) +
+    
+        geom_line( aes(y=Temperatur), size=2, color=temperatureColor) +
+        geom_line( aes(y=Umsatz / coeff), size=2, color=umsatzColor) + # Divide by 10 to get the same range than the temperature
+    
+        scale_y_continuous(
+      
+          # Features of the first axis
+          name = "Temperatur",
+      
+          # Add a second axis and specify its features
+          sec.axis = sec_axis(~.*coeff, name="Umsatz")
+        ) + 
+    
+        theme(
+          axis.title.y = element_text(color = temperatureColor, size=10),
+          axis.title.y.right = element_text(color = umsatzColor, size=10)
+        ) +
+  
+        ggtitle (paste("Umsatz Warengruppe ", i, " vs. Temperatur", sep = ""))
+ 
+   
+        assign(paste("p",i, sep = ""), p)
+}
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
