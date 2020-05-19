@@ -11,8 +11,8 @@ library(dplyr)
 
 
 #Daten importieren
-umsatzdaten <- read.csv("C:/Users/Sophia Fehrenbacher/Desktop/R Kurs/data-science-1/umsatzdaten_gekuerzt.csv")
-wetter <- read.csv("C:/Users/Sophia Fehrenbacher/Desktop/R Kurs/data-science-1/wetter.csv")
+umsatzdaten <- read.csv("umsatzdaten_gekuerzt.csv")
+wetter <- read.csv("wetter.csv")
 
 
 #Daten zu einem Datensatz zusammenfügen
