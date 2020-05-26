@@ -8,19 +8,39 @@ This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute
 Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
 
 ```{r}
+# Importing Function Packages
+library(dplyr)
 library(readr)
 library(lubridate)
-library(ggplot2)
-library(dplyr)
-
-umsatzdaten <- read_csv("umsatzdaten_gekuerzt.csv")
-for (i in 1:6){
-  plot(umsatzdaten[umsatzdaten$Warengruppe==i,]$Datum, umsatzdaten[umsatzdaten$Warengruppe==i,]$Umsatz,type="l", main = i)
-}
+library(broom)
+library(Metrics)
 ```
 
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
 
+```{r}
+umsatzdaten <- read_csv("umsatzdaten_gekuerzt.csv")
+wetter <- read_csv("wetter.csv")
+kiwo <- read_csv("kiwo.csv")
+
+vumsatz <- left_join(umsatzdaten,kiwo)
+vumsatz[is.na(vumsatz$KielerWoche),]$KielerWoche<-0
+vumsatz=left_join(vumsatz,wetter)
+vumsatz=vumsatz[vumsatz$Warengruppe<6,]
+vumsatz$Wetter <- 0
+vumsatz[is.na(vumsatz$Wettercode),]$Wetter = 1
+vumsatz$Wochentag <- weekdays(as.Date(vumsatz$Datum))
+View(vumsatz)
+```
+
 When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+```{r}
+mod1 <- lm(Umsatz ~ Temperatur * as.factor(Warengruppe), vumsatz)
+mod2 <- lm(Umsatz ~ Temperatur * as.factor(Warengruppe)+ as.factor(KielerWoche) * as.factor(Warengruppe)+Datum  * as.factor(Warengruppe)+ as.factor(Wochentag) * as.factor(Warengruppe), vumsatz)
+summary(mod1)
+summary(mod2)
+```
+
 
 The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
