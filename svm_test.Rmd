@@ -1,0 +1,88 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+
+```{r}
+
+library(dplyr)
+library(readr)
+library(lubridate)
+library(broom)
+library(Metrics)
+
+umsatzdaten <- read_csv("umsatzdaten_gekuerzt.csv")
+wetter <- read_csv("wetter.csv")
+kiwo <- read_csv("kiwo.csv")
+
+#Zusammenfügen der Daten und Anfügen weiterer Variablen
+#Test
+vumsatz <- left_join(umsatzdaten,kiwo)
+vumsatz[is.na(vumsatz$KielerWoche),]$KielerWoche<-0
+vumsatz=left_join(vumsatz,wetter)
+#Kodieren des Wetters in einer Variablen
+vumsatz$Wetter <- 0
+vumsatz[is.na(vumsatz$Wettercode),]$Wetter = 1
+vumsatz$Wochentag <- weekdays(as.Date(vumsatz$Datum))
+
+#Löschen von Zeilen mit NA-Einträgen oder ersetzen durch unsinnige Werte
+vumsatz=vumsatz[!is.na(vumsatz$Temperatur),]
+vumsatz[is.na(vumsatz$Wettercode),]$Wettercode=-1
+vumsatz[is.na(vumsatz$Bewoelkung),]$Bewoelkung=-1
+
+#Testen, ob Datensatz NA enthält
+#View(vumsatz)
+any(is.na(vumsatz$Datum))
+any(is.na(vumsatz$Umsatz))
+any(is.na(vumsatz$Warengruppe))
+any(is.na(vumsatz$KielerWoche))
+
+any(is.na(vumsatz$Temperatur))
+any(is.na(vumsatz$Bewoelkung))
+any(is.na(vumsatz$Wettercode))
+any(is.na(vumsatz$Windgeschwindigkeit))
+any(is.na(vumsatz$Wochentag))
+any(is.na(vumsatz$Wetter))
+```
+```{r}
+# Zufallszähler setzen (um die zufällige Partitionierung bei jedem Durchlauf gleich zu halten)
+set.seed(1)
+
+# Zufällige Ziehung Indizes für die Zeilen des Datensatzes, die dem Traininsdatensatz zugeordnet werden
+indices_train <- sample(seq_len(nrow(vumsatz)), size = floor(0.80 * nrow(vumsatz)))
+
+# Definition des Trainings- und Testdatensatz durch Selektion bzw. Deselektion der entsprechenden Datenzeilen
+umsatz_train <- umsatz_train_org <- vumsatz[indices_train, ]
+umsatz_test <- vumsatz[-indices_train, ]
+```
+
+
+```{r}
+#Verkleinerung des Datensatzes zu Testzwecken
+umsatz_train <- sample_frac(umsatz_train_org, .20)
+```
+
+
+```{r}
+#Berechnen von linearem Modell
+mod2 <- lm(Umsatz ~ as.factor(Warengruppe)+Temperatur * as.factor(Warengruppe)+ +Datum  * as.factor(Warengruppe)+ as.factor(Wochentag) * as.factor(Warengruppe), umsatz_train)
+mape(umsatz_train$Umsatz, predict(mod2,new_data=umsatz_train))
+
+#Errechnen des svm-Modells
+svm_tune <- tune(svm, Umsatz ~ as.factor(Warengruppe)+Temperatur*as.factor(Warengruppe)+Datum  * as.factor(Warengruppe)+ as.factor(Wochentag) * as.factor(Warengruppe), data=umsatz_train,
+                ranges = list(epsilon = seq(0.1,1,0.1), cost = 2^(0:3)))
+
+
+#Errechnen des relativen Fehlers für Trainingsdaten
+pred_best <- predict(svm_tune$best.model, umsatz_train)
+mape(umsatz_train$Umsatz, pred_best)
+
+#Errechnen des relativen Fehlers für Testdaten
+test_best <- predict(svm_tune$best.model,umsatz_test)
+mape( umsatz_test$Umsatz, test_best)
+
+
+```
+
