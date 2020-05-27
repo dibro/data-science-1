@@ -12,6 +12,7 @@ library(readr)
 library(lubridate)
 library(broom)
 library(Metrics)
+library(e1071)
 
 umsatzdaten <- read_csv("umsatzdaten_gekuerzt.csv")
 wetter <- read_csv("wetter.csv")
@@ -71,7 +72,7 @@ mod2 <- lm(Umsatz ~ as.factor(Warengruppe)+Temperatur * as.factor(Warengruppe)+ 
 mape(umsatz_train$Umsatz, predict(mod2,new_data=umsatz_train))
 
 #Errechnen des svm-Modells
-svm_tune <- tune(svm, Umsatz ~ as.factor(Warengruppe)+Temperatur*as.factor(Warengruppe)+Datum  * as.factor(Warengruppe)+ as.factor(Wochentag) * as.factor(Warengruppe), data=umsatz_train,
+svm_tune <- tune(svm, Umsatz ~ as.factor(Warengruppe)+as.factor(KielerWoche)+as.factor(Wetter)*as.factor(Warengruppe)+Temperatur*as.factor(Warengruppe)+Datum  * as.factor(Warengruppe)+ as.factor(Wochentag) * as.factor(Warengruppe), data=umsatz_train,
                 ranges = list(epsilon = seq(0.1,1,0.1), cost = 2^(0:3)))
 
 

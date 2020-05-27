@@ -1751,13 +1751,14 @@ summary {
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG5saWJyYXJ5KGRwbHlyKVxubGlicmFyeShyZWFkcilcbmxpYnJhcnkobHVicmlkYXRlKVxubGlicmFyeShicm9vbSlcbmxpYnJhcnkoTWV0cmljcylcblxudW1zYXR6ZGF0ZW4gPC0gcmVhZF9jc3YoXCJ1bXNhdHpkYXRlbl9nZWt1ZXJ6dC5jc3ZcIilcbmBgYCJ9 -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG5saWJyYXJ5KGRwbHlyKVxubGlicmFyeShyZWFkcilcbmxpYnJhcnkobHVicmlkYXRlKVxubGlicmFyeShicm9vbSlcbmxpYnJhcnkoTWV0cmljcylcbmxpYnJhcnkoZTEwNzEpXG5cbnVtc2F0emRhdGVuIDwtIHJlYWRfY3N2KFwidW1zYXR6ZGF0ZW5fZ2VrdWVyenQuY3N2XCIpXG5gYGAifQ== -->
 <pre class="r"><code>
 library(dplyr)
 library(readr)
 library(lubridate)
 library(broom)
 library(Metrics)
+library(e1071)
 
 umsatzdaten &lt;- read_csv(&quot;umsatzdaten_gekuerzt.csv&quot;)</code></pre>
 <!-- rnb-source-end -->
@@ -1807,145 +1808,91 @@ vumsatz=left_join(vumsatz,wetter)</code></pre>
 <!-- rnb-output-begin eyJkYXRhIjoiSm9pbmluZywgYnkgPSBcIkRhdHVtXCJcbiJ9 -->
 <pre><code>Joining, by = &quot;Datum&quot;</code></pre>
 <!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudnVtc2F0ej12dW1zYXR6W11cbnZ1bXNhdHokV2V0dGVyIDwtIDBcbnZ1bXNhdHpbaXMubmEodnVtc2F0eiRXZXR0ZXJjb2RlKSxdJFdldHRlciA9IDFcbnZ1bXNhdHokV29jaGVudGFnIDwtIHdlZWtkYXlzKGFzLkRhdGUodnVtc2F0eiREYXR1bSkpXG5WaWV3KHZ1bXNhdHopXG5gYGAifQ== -->
-<pre class="r"><code>vumsatz=vumsatz[]
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuI0tvZGllcmVuIGRlcyBXZXR0ZXJzIGluIGVpbmVyIFZhcmlhYmxlblxudnVtc2F0eiRXZXR0ZXIgPC0gMFxudnVtc2F0eltpcy5uYSh2dW1zYXR6JFdldHRlcmNvZGUpLF0kV2V0dGVyID0gMVxudnVtc2F0eiRXb2NoZW50YWcgPC0gd2Vla2RheXMoYXMuRGF0ZSh2dW1zYXR6JERhdHVtKSlcblxuI0zDtnNjaGVuIHZvbiBaZWlsZW4gbWl0IE5BLUVpbnRyw6RnZW4gb2RlciBlcnNldHplbiBkdXJjaCB1bnNpbm5pZ2UgV2VydGVcbnZ1bXNhdHo9dnVtc2F0elshaXMubmEodnVtc2F0eiRUZW1wZXJhdHVyKSxdXG52dW1zYXR6W2lzLm5hKHZ1bXNhdHokV2V0dGVyY29kZSksXSRXZXR0ZXJjb2RlPS0xXG52dW1zYXR6W2lzLm5hKHZ1bXNhdHokQmV3b2Vsa3VuZyksXSRCZXdvZWxrdW5nPS0xXG5cbiNUZXN0ZW4sIG9iIERhdGVuc2F0eiBOQSBlbnRow6RsdFxuI1ZpZXcodnVtc2F0eilcbmFueShpcy5uYSh2dW1zYXR6JERhdHVtKSlcbmBgYCJ9 -->
+<pre class="r"><code>#Kodieren des Wetters in einer Variablen
 vumsatz$Wetter &lt;- 0
 vumsatz[is.na(vumsatz$Wettercode),]$Wetter = 1
 vumsatz$Wochentag &lt;- weekdays(as.Date(vumsatz$Datum))
-View(vumsatz)</code></pre>
+
+#Löschen von Zeilen mit NA-Einträgen oder ersetzen durch unsinnige Werte
+vumsatz=vumsatz[!is.na(vumsatz$Temperatur),]
+vumsatz[is.na(vumsatz$Wettercode),]$Wettercode=-1
+vumsatz[is.na(vumsatz$Bewoelkung),]$Bewoelkung=-1
+
+#Testen, ob Datensatz NA enthält
+#View(vumsatz)
+any(is.na(vumsatz$Datum))</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIEZBTFNFXG4ifQ== -->
+<pre><code>[1] FALSE</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYW55KGlzLm5hKHZ1bXNhdHokVW1zYXR6KSlcbmBgYCJ9 -->
+<pre class="r"><code>any(is.na(vumsatz$Umsatz))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIEZBTFNFXG4ifQ== -->
+<pre><code>[1] FALSE</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYW55KGlzLm5hKHZ1bXNhdHokV2FyZW5ncnVwcGUpKVxuYGBgIn0= -->
+<pre class="r"><code>any(is.na(vumsatz$Warengruppe))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIEZBTFNFXG4ifQ== -->
+<pre><code>[1] FALSE</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYW55KGlzLm5hKHZ1bXNhdHokS2llbGVyV29jaGUpKVxuYGBgIn0= -->
+<pre class="r"><code>any(is.na(vumsatz$KielerWoche))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIEZBTFNFXG4ifQ== -->
+<pre><code>[1] FALSE</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYW55KGlzLm5hKHZ1bXNhdHokVGVtcGVyYXR1cikpXG5gYGAifQ== -->
+<pre class="r"><code>any(is.na(vumsatz$Temperatur))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIEZBTFNFXG4ifQ== -->
+<pre><code>[1] FALSE</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYW55KGlzLm5hKHZ1bXNhdHokQmV3b2Vsa3VuZykpXG5gYGAifQ== -->
+<pre class="r"><code>any(is.na(vumsatz$Bewoelkung))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIEZBTFNFXG4ifQ== -->
+<pre><code>[1] FALSE</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYW55KGlzLm5hKHZ1bXNhdHokV2V0dGVyY29kZSkpXG5gYGAifQ== -->
+<pre class="r"><code>any(is.na(vumsatz$Wettercode))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIEZBTFNFXG4ifQ== -->
+<pre><code>[1] FALSE</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYW55KGlzLm5hKHZ1bXNhdHokV2luZGdlc2Nod2luZGlna2VpdCkpXG5gYGAifQ== -->
+<pre class="r"><code>any(is.na(vumsatz$Windgeschwindigkeit))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIEZBTFNFXG4ifQ== -->
+<pre><code>[1] FALSE</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYW55KGlzLm5hKHZ1bXNhdHokV29jaGVudGFnKSlcbmBgYCJ9 -->
+<pre class="r"><code>any(is.na(vumsatz$Wochentag))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIEZBTFNFXG4ifQ== -->
+<pre><code>[1] FALSE</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYW55KGlzLm5hKHZ1bXNhdHokV2V0dGVyKSlcbmBgYCJ9 -->
+<pre class="r"><code>any(is.na(vumsatz$Wetter))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIEZBTFNFXG4ifQ== -->
+<pre><code>[1] FALSE</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubW9kMSA8LSBsbShVbXNhdHogfiBUZW1wZXJhdHVyICogYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKSwgdnVtc2F0eilcbm1vZDIgPC0gbG0oVW1zYXR6IH4gVGVtcGVyYXR1ciAqIGFzLmZhY3RvcihXYXJlbmdydXBwZSkrIGFzLmZhY3RvcihLaWVsZXJXb2NoZSkgKiBhcy5mYWN0b3IoV2FyZW5ncnVwcGUpK0RhdHVtICAqIGFzLmZhY3RvcihXYXJlbmdydXBwZSkrIGFzLmZhY3RvcihXb2NoZW50YWcpICogYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKSwgdnVtc2F0eilcbnN1bW1hcnkobW9kMSlcbmBgYCJ9 -->
-<pre class="r"><code>mod1 &lt;- lm(Umsatz ~ Temperatur * as.factor(Warengruppe), vumsatz)
-mod2 &lt;- lm(Umsatz ~ Temperatur * as.factor(Warengruppe)+ as.factor(KielerWoche) * as.factor(Warengruppe)+Datum  * as.factor(Warengruppe)+ as.factor(Wochentag) * as.factor(Warengruppe), vumsatz)
-summary(mod1)</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBadWZhbGxzesOkaGxlciBzZXR6ZW4gKHVtIGRpZSB6dWbDpGxsaWdlIFBhcnRpdGlvbmllcnVuZyBiZWkgamVkZW0gRHVyY2hsYXVmIGdsZWljaCB6dSBoYWx0ZW4pXG5zZXQuc2VlZCgxKVxuXG4jIFp1ZsOkbGxpZ2UgWmllaHVuZyBJbmRpemVzIGbDvHIgZGllIFplaWxlbiBkZXMgRGF0ZW5zYXR6ZXMsIGRpZSBkZW0gVHJhaW5pbnNkYXRlbnNhdHogenVnZW9yZG5ldCB3ZXJkZW5cbmluZGljZXNfdHJhaW4gPC0gc2FtcGxlKHNlcV9sZW4obnJvdyh2dW1zYXR6KSksIHNpemUgPSBmbG9vcigwLjgwICogbnJvdyh2dW1zYXR6KSkpXG5cbiMgRGVmaW5pdGlvbiBkZXMgVHJhaW5pbmdzLSB1bmQgVGVzdGRhdGVuc2F0eiBkdXJjaCBTZWxla3Rpb24gYnp3LiBEZXNlbGVrdGlvbiBkZXIgZW50c3ByZWNoZW5kZW4gRGF0ZW56ZWlsZW5cbnVtc2F0el90cmFpbiA8LSB1bXNhdHpfdHJhaW5fb3JnIDwtIHZ1bXNhdHpbaW5kaWNlc190cmFpbiwgXVxudW1zYXR6X3Rlc3QgPC0gdnVtc2F0elstaW5kaWNlc190cmFpbiwgXVxuYGBgIn0= -->
+<pre class="r"><code># Zufallszähler setzen (um die zufällige Partitionierung bei jedem Durchlauf gleich zu halten)
+set.seed(1)
+
+# Zufällige Ziehung Indizes für die Zeilen des Datensatzes, die dem Traininsdatensatz zugeordnet werden
+indices_train &lt;- sample(seq_len(nrow(vumsatz)), size = floor(0.80 * nrow(vumsatz)))
+
+# Definition des Trainings- und Testdatensatz durch Selektion bzw. Deselektion der entsprechenden Datenzeilen
+umsatz_train &lt;- umsatz_train_org &lt;- vumsatz[indices_train, ]
+umsatz_test &lt;- vumsatz[-indices_train, ]</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiXG5DYWxsOlxubG0oZm9ybXVsYSA9IFVtc2F0eiB+IFRlbXBlcmF0dXIgKiBhcy5mYWN0b3IoV2FyZW5ncnVwcGUpLCBkYXRhID0gdnVtc2F0eilcblxuUmVzaWR1YWxzOlxuICAgIE1pbiAgICAgIDFRICBNZWRpYW4gICAgICAzUSAgICAgTWF4IFxuLTI2Mi4xMCAgLTM2LjMxICAgLTcuOTEgICAyNS44NyAxNjEzLjM3IFxuXG5Db2VmZmljaWVudHM6XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIEVzdGltYXRlIFN0ZC4gRXJyb3IgdCB2YWx1ZSBQcig+fHR8KSAgICBcbihJbnRlcmNlcHQpICAgICAgICAgICAgICAgICAgICAgICAgMTA5LjY4MjAgICAgIDMuMTgxNSAgMzQuNDc1ICA8IDJlLTE2ICoqKlxuVGVtcGVyYXR1ciAgICAgICAgICAgICAgICAgICAgICAgICAgIDEuMjE1NSAgICAgMC4yMjc3ICAgNS4zMzkgOS41NGUtMDggKioqXG5hcy5mYWN0b3IoV2FyZW5ncnVwcGUpMiAgICAgICAgICAgIDE1OS4wMDA3ICAgICA0LjQ5OTMgIDM1LjMzOSAgPCAyZS0xNiAqKipcbmFzLmZhY3RvcihXYXJlbmdydXBwZSkzICAgICAgICAgICAgLTIyLjQwMDEgICAgIDQuNDk5MyAgLTQuOTc5IDYuNTBlLTA3ICoqKlxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTQgICAgICAgICAgICAtMTYuMzU1MCAgICAgNC41MjU3ICAtMy42MTQgMC4wMDAzMDMgKioqXG5hcy5mYWN0b3IoV2FyZW5ncnVwcGUpNSAgICAgICAgICAgIDE0Mi41NzY2ICAgICA0LjQ5OTMgIDMxLjY4OSAgPCAyZS0xNiAqKipcbmFzLmZhY3RvcihXYXJlbmdydXBwZSk2ICAgICAgICAgICAgLTI0LjQzMzEgICAgIDkuMjY4NiAgLTIuNjM2IDAuMDA4Mzk4ICoqIFxuVGVtcGVyYXR1cjphcy5mYWN0b3IoV2FyZW5ncnVwcGUpMiAgIDkuNjI1MiAgICAgMC4zMjIwICAyOS44OTQgIDwgMmUtMTYgKioqXG5UZW1wZXJhdHVyOmFzLmZhY3RvcihXYXJlbmdydXBwZSkzICAgNS4xOTk2ICAgICAwLjMyMjAgIDE2LjE0OSAgPCAyZS0xNiAqKipcblRlbXBlcmF0dXI6YXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTQgIC0xLjcwOTMgICAgIDAuMzI0MyAgLTUuMjcwIDEuMzllLTA3ICoqKlxuVGVtcGVyYXR1cjphcy5mYWN0b3IoV2FyZW5ncnVwcGUpNSAgIDAuOTM4MiAgICAgMC4zMjIwICAgMi45MTQgMC4wMDM1NzggKiogXG5UZW1wZXJhdHVyOmFzLmZhY3RvcihXYXJlbmdydXBwZSk2ICAtMy45MzQ5ICAgICAxLjE4MjEgIC0zLjMyOSAwLjAwMDg3NSAqKipcbi0tLVxuU2lnbmlmLiBjb2RlczogIDAg4oCYKioq4oCZIDAuMDAxIOKAmCoq4oCZIDAuMDEg4oCYKuKAmSAwLjA1IOKAmC7igJkgMC4xIOKAmCDigJkgMVxuXG5SZXNpZHVhbCBzdGFuZGFyZCBlcnJvcjogNzQuOTYgb24gMTA3OTEgZGVncmVlcyBvZiBmcmVlZG9tXG4gICg4MSBvYnNlcnZhdGlvbnMgZGVsZXRlZCBkdWUgdG8gbWlzc2luZ25lc3MpXG5NdWx0aXBsZSBSLXNxdWFyZWQ6ICAwLjcyNTIsXHRBZGp1c3RlZCBSLXNxdWFyZWQ6ICAwLjcyNDkgXG5GLXN0YXRpc3RpYzogIDI1ODkgb24gMTEgYW5kIDEwNzkxIERGLCAgcC12YWx1ZTogPCAyLjJlLTE2XG4ifQ== -->
-<pre><code>
-Call:
-lm(formula = Umsatz ~ Temperatur * as.factor(Warengruppe), data = vumsatz)
-
-Residuals:
-    Min      1Q  Median      3Q     Max 
--262.10  -36.31   -7.91   25.87 1613.37 
-
-Coefficients:
-                                   Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)                        109.6820     3.1815  34.475  &lt; 2e-16 ***
-Temperatur                           1.2155     0.2277   5.339 9.54e-08 ***
-as.factor(Warengruppe)2            159.0007     4.4993  35.339  &lt; 2e-16 ***
-as.factor(Warengruppe)3            -22.4001     4.4993  -4.979 6.50e-07 ***
-as.factor(Warengruppe)4            -16.3550     4.5257  -3.614 0.000303 ***
-as.factor(Warengruppe)5            142.5766     4.4993  31.689  &lt; 2e-16 ***
-as.factor(Warengruppe)6            -24.4331     9.2686  -2.636 0.008398 ** 
-Temperatur:as.factor(Warengruppe)2   9.6252     0.3220  29.894  &lt; 2e-16 ***
-Temperatur:as.factor(Warengruppe)3   5.1996     0.3220  16.149  &lt; 2e-16 ***
-Temperatur:as.factor(Warengruppe)4  -1.7093     0.3243  -5.270 1.39e-07 ***
-Temperatur:as.factor(Warengruppe)5   0.9382     0.3220   2.914 0.003578 ** 
-Temperatur:as.factor(Warengruppe)6  -3.9349     1.1821  -3.329 0.000875 ***
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-Residual standard error: 74.96 on 10791 degrees of freedom
-  (81 observations deleted due to missingness)
-Multiple R-squared:  0.7252,    Adjusted R-squared:  0.7249 
-F-statistic:  2589 on 11 and 10791 DF,  p-value: &lt; 2.2e-16</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3VtbWFyeShtb2QyKVxuYGBgIn0= -->
-<pre class="r"><code>summary(mod2)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiXG5DYWxsOlxubG0oZm9ybXVsYSA9IFVtc2F0eiB+IFRlbXBlcmF0dXIgKiBhcy5mYWN0b3IoV2FyZW5ncnVwcGUpICsgYXMuZmFjdG9yKEtpZWxlcldvY2hlKSAqIFxuICAgIGFzLmZhY3RvcihXYXJlbmdydXBwZSkgKyBEYXR1bSAqIGFzLmZhY3RvcihXYXJlbmdydXBwZSkgKyBcbiAgICBhcy5mYWN0b3IoV29jaGVudGFnKSAqIGFzLmZhY3RvcihXYXJlbmdydXBwZSksIGRhdGEgPSB2dW1zYXR6KVxuXG5SZXNpZHVhbHM6XG4gICAgTWluICAgICAgMVEgIE1lZGlhbiAgICAgIDNRICAgICBNYXggXG4tMjY1LjI1ICAtMjkuNTUgICAtNS44OSAgIDIwLjcwIDE2MTkuOTMgXG5cbkNvZWZmaWNpZW50czogKDEgbm90IGRlZmluZWQgYmVjYXVzZSBvZiBzaW5ndWxhcml0aWVzKVxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgRXN0aW1hdGUgU3RkLiBFcnJvciB0IHZhbHVlIFByKD58dHwpICAgIFxuKEludGVyY2VwdCkgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA0OS40OTYyMTkgIDM4Ljk1ODY3MSAgIDEuMjcwIDAuMjAzOTQxICAgIFxuVGVtcGVyYXR1ciAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgMS4yMzY3ODIgICAwLjE5ODk1MSAgIDYuMjE3IDUuMjdlLTEwICoqKlxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTIgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDgyOS42OTc5NzUgIDU1LjA5NTg4MSAgMTUuMDU5ICA8IDJlLTE2ICoqKlxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTMgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDExMi4yNDY3NjEgIDU1LjA5NTg4MSAgIDIuMDM3IDAuMDQxNjQ1ICogIFxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTQgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA5OS4xODczNDYgIDU1LjU3MjExOSAgIDEuNzg1IDAuMDc0MzE1IC4gIFxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTUgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDQ4Mi4yOTM1NzkgIDU1LjA5NTg4MSAgIDguNzU0ICA8IDJlLTE2ICoqKlxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTYgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgMy42MTExMTIgMTAyLjI5NDAzNiAgIDAuMDM1IDAuOTcxODQwICAgIFxuYXMuZmFjdG9yKEtpZWxlcldvY2hlKTEgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgNi4zMTIyMDEgICA5Ljg1MTE1MiAgIDAuNjQxIDAuNTIxNjk0ICAgIFxuRGF0dW0gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgMC4wMDMzMzUgICAwLjAwMjI3MiAgIDEuNDY4IDAuMTQyMTYxICAgIFxuYXMuZmFjdG9yKFdvY2hlbnRhZylEb25uZXJzdGFnICAgICAgICAgICAgICAgICAgICAgICAgICAxNi45MDM3OTUgICA1LjI3MzYyOCAgIDMuMjA1IDAuMDAxMzUzICoqIFxuYXMuZmFjdG9yKFdvY2hlbnRhZylGcmVpdGFnICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgOC4xMzkyMzYgICA1LjI3ODE2OCAgIDEuNTQyIDAuMTIzMDg5ICAgIFxuYXMuZmFjdG9yKFdvY2hlbnRhZylNaXR0d29jaCAgICAgICAgICAgICAgICAgICAgICAgICAgICAtMi45NDk3MzggICA1LjI3MzQ1MyAgLTAuNTU5IDAuNTc1OTMwICAgIFxuYXMuZmFjdG9yKFdvY2hlbnRhZylNb250YWcgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAxNS4xOTY2NTEgICA1LjI2OTA4NiAgIDIuODg0IDAuMDAzOTMzICoqIFxuYXMuZmFjdG9yKFdvY2hlbnRhZylTYW1zdGFnICAgICAgICAgICAgICAgICAgICAgICAgICAgICAyOS4wODQxNzkgICA1LjI3MTk0NCAgIDUuNTE3IDMuNTNlLTA4ICoqKlxuYXMuZmFjdG9yKFdvY2hlbnRhZylTb25udGFnICAgICAgICAgICAgICAgICAgICAgICAgICAgIC00NC4wNTQyNTQgICA1LjI4MDUyNCAgLTguMzQzICA8IDJlLTE2ICoqKlxuVGVtcGVyYXR1cjphcy5mYWN0b3IoV2FyZW5ncnVwcGUpMiAgICAgICAgICAgICAgICAgICAgICAgOS4yNjE3MzcgICAwLjI4MTM1OSAgMzIuOTE4ICA8IDJlLTE2ICoqKlxuVGVtcGVyYXR1cjphcy5mYWN0b3IoV2FyZW5ncnVwcGUpMyAgICAgICAgICAgICAgICAgICAgICAgNS4xNDk3NzQgICAwLjI4MTM1OSAgMTguMzAzICA8IDJlLTE2ICoqKlxuVGVtcGVyYXR1cjphcy5mYWN0b3IoV2FyZW5ncnVwcGUpNCAgICAgICAgICAgICAgICAgICAgICAtMS43MjgyMTMgICAwLjI4MzI5NCAgLTYuMTAwIDEuMDllLTA5ICoqKlxuVGVtcGVyYXR1cjphcy5mYWN0b3IoV2FyZW5ncnVwcGUpNSAgICAgICAgICAgICAgICAgICAgICAgMC43NjYxOTggICAwLjI4MTM1OSAgIDIuNzIzIDAuMDA2NDc2ICoqIFxuVGVtcGVyYXR1cjphcy5mYWN0b3IoV2FyZW5ncnVwcGUpNiAgICAgICAgICAgICAgICAgICAgICAtMy44NzY1NTUgICAxLjAzNDk1NiAgLTMuNzQ2IDAuMDAwMTgxICoqKlxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTI6YXMuZmFjdG9yKEtpZWxlcldvY2hlKTEgICAgICAgICA0NC4zNTM3MzggIDEzLjkzMTYzMiAgIDMuMTg0IDAuMDAxNDU4ICoqIFxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTM6YXMuZmFjdG9yKEtpZWxlcldvY2hlKTEgICAgICAgICAgMS45MTIwMTIgIDEzLjkzMTYzMiAgIDAuMTM3IDAuODkwODQyICAgIFxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTQ6YXMuZmFjdG9yKEtpZWxlcldvY2hlKTEgICAgICAgIC0xNC42NjU0NTcgIDE0LjA4ODAzNiAgLTEuMDQxIDAuMjk3OTA1ICAgIFxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTU6YXMuZmFjdG9yKEtpZWxlcldvY2hlKTEgICAgICAgICAxMS40ODIyOTUgIDEzLjkzMTYzMiAgIDAuODI0IDAuNDA5ODUxICAgIFxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTY6YXMuZmFjdG9yKEtpZWxlcldvY2hlKTEgICAgICAgICAgICAgICAgTkEgICAgICAgICBOQSAgICAgIE5BICAgICAgIE5BICAgIFxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTI6RGF0dW0gICAgICAgICAgICAgICAgICAgICAgICAgICAtMC4wNDE5OTYgICAwLjAwMzIxMyAtMTMuMDY5ICA8IDJlLTE2ICoqKlxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTM6RGF0dW0gICAgICAgICAgICAgICAgICAgICAgICAgICAtMC4wMDg4ODUgICAwLjAwMzIxMyAgLTIuNzY1IDAuMDA1NzAyICoqIFxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTQ6RGF0dW0gICAgICAgICAgICAgICAgICAgICAgICAgICAtMC4wMDcxMDggICAwLjAwMzI0MCAgLTIuMTk0IDAuMDI4Mjc0ICogIFxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTU6RGF0dW0gICAgICAgICAgICAgICAgICAgICAgICAgICAtMC4wMjA4NTYgICAwLjAwMzIxMyAgLTYuNDkwIDguOTVlLTExICoqKlxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTY6RGF0dW0gICAgICAgICAgICAgICAgICAgICAgICAgICAtMC4wMDE1NTUgICAwLjAwNTk2MyAgLTAuMjYxIDAuNzk0MzAyICAgIFxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTI6YXMuZmFjdG9yKFdvY2hlbnRhZylEb25uZXJzdGFnICAtNS42MzM4NjQgICA3LjQ1ODAzNiAgLTAuNzU1IDAuNDUwMDIwICAgIFxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTM6YXMuZmFjdG9yKFdvY2hlbnRhZylEb25uZXJzdGFnIC0xNi41NDA0MTMgICA3LjQ1ODAzNiAgLTIuMjE4IDAuMDI2NTg5ICogIFxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTQ6YXMuZmFjdG9yKFdvY2hlbnRhZylEb25uZXJzdGFnIC0xOC40Mzg0MzkgICA3LjUwMjIwOCAgLTIuNDU4IDAuMDEzOTk3ICogIFxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTU6YXMuZmFjdG9yKFdvY2hlbnRhZylEb25uZXJzdGFnICAtOC4zNDU5MTEgICA3LjQ1ODAzNiAgLTEuMTE5IDAuMjYzMTQ0ICAgIFxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTY6YXMuZmFjdG9yKFdvY2hlbnRhZylEb25uZXJzdGFnIC0xMi4xNjA0OTIgIDEzLjc2NDc3MCAgLTAuODgzIDAuMzc3MDEzICAgIFxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTI6YXMuZmFjdG9yKFdvY2hlbnRhZylGcmVpdGFnICAgICAgOC4yMDE2ODIgICA3LjQ2NDQ1NyAgIDEuMDk5IDAuMjcxODk1ICAgIFxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTM6YXMuZmFjdG9yKFdvY2hlbnRhZylGcmVpdGFnICAgICAtMi43NzAwODkgICA3LjQ2NDQ1NyAgLTAuMzcxIDAuNzEwNTY3ICAgIFxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTQ6YXMuZmFjdG9yKFdvY2hlbnRhZylGcmVpdGFnICAgICAtNi45MTU5MTIgICA3LjUyMTk4MSAgLTAuOTE5IDAuMzU3ODkzICAgIFxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTU6YXMuZmFjdG9yKFdvY2hlbnRhZylGcmVpdGFnICAgICAgNS40NDAzNjYgICA3LjQ2NDQ1NyAgIDAuNzI5IDAuNDY2MTE4ICAgIFxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTY6YXMuZmFjdG9yKFdvY2hlbnRhZylGcmVpdGFnICAgICAtNS4zNDc0OTYgIDEzLjk4MzM4NCAgLTAuMzgyIDAuNzAyMTU5ICAgIFxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTI6YXMuZmFjdG9yKFdvY2hlbnRhZylNaXR0d29jaCAgICAtMi41NzQxNTEgICA3LjQ1Nzc4OSAgLTAuMzQ1IDAuNzI5OTc5ICAgIFxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTM6YXMuZmFjdG9yKFdvY2hlbnRhZylNaXR0d29jaCAgICAgMS42MTIxOTYgICA3LjQ1Nzc4OSAgIDAuMjE2IDAuODI4ODU1ICAgIFxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTQ6YXMuZmFjdG9yKFdvY2hlbnRhZylNaXR0d29jaCAgICAgMS4wMTIxNDAgICA3LjUyODM1NCAgIDAuMTM0IDAuODkzMDU0ICAgIFxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTU6YXMuZmFjdG9yKFdvY2hlbnRhZylNaXR0d29jaCAgICAgOC4zMjE5NjAgICA3LjQ1Nzc4OSAgIDEuMTE2IDAuMjY0NTAxICAgIFxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTY6YXMuZmFjdG9yKFdvY2hlbnRhZylNaXR0d29jaCAgICAgMy43MTg5ODcgIDE0LjExMzc2NiAgIDAuMjY0IDAuNzkyMTcwICAgIFxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTI6YXMuZmFjdG9yKFdvY2hlbnRhZylNb250YWcgICAgICAtMy40OTUzODYgICA3LjQ1MTYxMyAgLTAuNDY5IDAuNjM5MDI0ICAgIFxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTM6YXMuZmFjdG9yKFdvY2hlbnRhZylNb250YWcgICAgICAtOS44MzA0MDQgICA3LjQ1MTYxMyAgLTEuMzE5IDAuMTg3MTIwICAgIFxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTQ6YXMuZmFjdG9yKFdvY2hlbnRhZylNb250YWcgICAgIC0xMi41NTk2NjkgICA3LjUwNTQyOSAgLTEuNjczIDAuMDk0Mjc1IC4gIFxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTU6YXMuZmFjdG9yKFdvY2hlbnRhZylNb250YWcgICAgIC0xNC45MjA2ODIgICA3LjQ1MTYxMyAgLTIuMDAyIDAuMDQ1MjczICogIFxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTY6YXMuZmFjdG9yKFdvY2hlbnRhZylNb250YWcgICAgIC0xNy45NjMxMTkgIDEzLjk3NTk5NiAgLTEuMjg1IDAuMTk4NzIxICAgIFxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTI6YXMuZmFjdG9yKFdvY2hlbnRhZylTYW1zdGFnICAgICA5Ny4yOTQ2MDcgICA3LjQ1NTY1NSAgMTMuMDUwICA8IDJlLTE2ICoqKlxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTM6YXMuZmFjdG9yKFdvY2hlbnRhZylTYW1zdGFnICAgICAzMS4xMzc3MjYgICA3LjQ1NTY1NSAgIDQuMTc2IDIuOTllLTA1ICoqKlxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTQ6YXMuZmFjdG9yKFdvY2hlbnRhZylTYW1zdGFnICAgIC0yMS40ODI1NzYgICA3LjUxMjE2NCAgLTIuODYwIDAuMDA0MjQ5ICoqIFxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTU6YXMuZmFjdG9yKFdvY2hlbnRhZylTYW1zdGFnICAgICAyMy45NjY0ODkgICA3LjQ1NTY1NSAgIDMuMjE1IDAuMDAxMzEwICoqIFxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTY6YXMuZmFjdG9yKFdvY2hlbnRhZylTYW1zdGFnICAgIC0xOS4yMTk1MjYgIDE0LjA0MzU0MyAgLTEuMzY5IDAuMTcxMTYzICAgIFxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTI6YXMuZmFjdG9yKFdvY2hlbnRhZylTb25udGFnICAgIDIyMS45NDQ1NDUgICA3LjQ2Nzc4OCAgMjkuNzIwICA8IDJlLTE2ICoqKlxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTM6YXMuZmFjdG9yKFdvY2hlbnRhZylTb25udGFnICAgIDExMy4wNjQ3MTAgICA3LjQ2Nzc4OCAgMTUuMTQwICA8IDJlLTE2ICoqKlxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTQ6YXMuZmFjdG9yKFdvY2hlbnRhZylTb25udGFnICAgICA5Ni45NDI0MzcgICA3LjQ5OTMxNyAgMTIuOTI3ICA8IDJlLTE2ICoqKlxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTU6YXMuZmFjdG9yKFdvY2hlbnRhZylTb25udGFnICAgICA5Ni44MDExMzkgICA3LjQ2Nzc4OCAgMTIuOTYyICA8IDJlLTE2ICoqKlxuYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKTY6YXMuZmFjdG9yKFdvY2hlbnRhZylTb25udGFnICAgICAzOS4yMjkxNDAgIDEzLjkyNDI4NyAgIDIuODE3IDAuMDA0ODUxICoqIFxuLS0tXG5TaWduaWYuIGNvZGVzOiAgMCDigJgqKirigJkgMC4wMDEg4oCYKirigJkgMC4wMSDigJgq4oCZIDAuMDUg4oCYLuKAmSAwLjEg4oCYIOKAmSAxXG5cblJlc2lkdWFsIHN0YW5kYXJkIGVycm9yOiA2NC42OSBvbiAxMDc0NCBkZWdyZWVzIG9mIGZyZWVkb21cbiAgKDgxIG9ic2VydmF0aW9ucyBkZWxldGVkIGR1ZSB0byBtaXNzaW5nbmVzcylcbk11bHRpcGxlIFItc3F1YXJlZDogIDAuNzk2MixcdEFkanVzdGVkIFItc3F1YXJlZDogIDAuNzk1MSBcbkYtc3RhdGlzdGljOiA3MjMuOSBvbiA1OCBhbmQgMTA3NDQgREYsICBwLXZhbHVlOiA8IDIuMmUtMTZcbiJ9 -->
-<pre><code>
-Call:
-lm(formula = Umsatz ~ Temperatur * as.factor(Warengruppe) + as.factor(KielerWoche) * 
-    as.factor(Warengruppe) + Datum * as.factor(Warengruppe) + 
-    as.factor(Wochentag) * as.factor(Warengruppe), data = vumsatz)
-
-Residuals:
-    Min      1Q  Median      3Q     Max 
--265.25  -29.55   -5.89   20.70 1619.93 
-
-Coefficients: (1 not defined because of singularities)
-                                                         Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)                                             49.496219  38.958671   1.270 0.203941    
-Temperatur                                               1.236782   0.198951   6.217 5.27e-10 ***
-as.factor(Warengruppe)2                                829.697975  55.095881  15.059  &lt; 2e-16 ***
-as.factor(Warengruppe)3                                112.246761  55.095881   2.037 0.041645 *  
-as.factor(Warengruppe)4                                 99.187346  55.572119   1.785 0.074315 .  
-as.factor(Warengruppe)5                                482.293579  55.095881   8.754  &lt; 2e-16 ***
-as.factor(Warengruppe)6                                  3.611112 102.294036   0.035 0.971840    
-as.factor(KielerWoche)1                                  6.312201   9.851152   0.641 0.521694    
-Datum                                                    0.003335   0.002272   1.468 0.142161    
-as.factor(Wochentag)Donnerstag                          16.903795   5.273628   3.205 0.001353 ** 
-as.factor(Wochentag)Freitag                              8.139236   5.278168   1.542 0.123089    
-as.factor(Wochentag)Mittwoch                            -2.949738   5.273453  -0.559 0.575930    
-as.factor(Wochentag)Montag                              15.196651   5.269086   2.884 0.003933 ** 
-as.factor(Wochentag)Samstag                             29.084179   5.271944   5.517 3.53e-08 ***
-as.factor(Wochentag)Sonntag                            -44.054254   5.280524  -8.343  &lt; 2e-16 ***
-Temperatur:as.factor(Warengruppe)2                       9.261737   0.281359  32.918  &lt; 2e-16 ***
-Temperatur:as.factor(Warengruppe)3                       5.149774   0.281359  18.303  &lt; 2e-16 ***
-Temperatur:as.factor(Warengruppe)4                      -1.728213   0.283294  -6.100 1.09e-09 ***
-Temperatur:as.factor(Warengruppe)5                       0.766198   0.281359   2.723 0.006476 ** 
-Temperatur:as.factor(Warengruppe)6                      -3.876555   1.034956  -3.746 0.000181 ***
-as.factor(Warengruppe)2:as.factor(KielerWoche)1         44.353738  13.931632   3.184 0.001458 ** 
-as.factor(Warengruppe)3:as.factor(KielerWoche)1          1.912012  13.931632   0.137 0.890842    
-as.factor(Warengruppe)4:as.factor(KielerWoche)1        -14.665457  14.088036  -1.041 0.297905    
-as.factor(Warengruppe)5:as.factor(KielerWoche)1         11.482295  13.931632   0.824 0.409851    
-as.factor(Warengruppe)6:as.factor(KielerWoche)1                NA         NA      NA       NA    
-as.factor(Warengruppe)2:Datum                           -0.041996   0.003213 -13.069  &lt; 2e-16 ***
-as.factor(Warengruppe)3:Datum                           -0.008885   0.003213  -2.765 0.005702 ** 
-as.factor(Warengruppe)4:Datum                           -0.007108   0.003240  -2.194 0.028274 *  
-as.factor(Warengruppe)5:Datum                           -0.020856   0.003213  -6.490 8.95e-11 ***
-as.factor(Warengruppe)6:Datum                           -0.001555   0.005963  -0.261 0.794302    
-as.factor(Warengruppe)2:as.factor(Wochentag)Donnerstag  -5.633864   7.458036  -0.755 0.450020    
-as.factor(Warengruppe)3:as.factor(Wochentag)Donnerstag -16.540413   7.458036  -2.218 0.026589 *  
-as.factor(Warengruppe)4:as.factor(Wochentag)Donnerstag -18.438439   7.502208  -2.458 0.013997 *  
-as.factor(Warengruppe)5:as.factor(Wochentag)Donnerstag  -8.345911   7.458036  -1.119 0.263144    
-as.factor(Warengruppe)6:as.factor(Wochentag)Donnerstag -12.160492  13.764770  -0.883 0.377013    
-as.factor(Warengruppe)2:as.factor(Wochentag)Freitag      8.201682   7.464457   1.099 0.271895    
-as.factor(Warengruppe)3:as.factor(Wochentag)Freitag     -2.770089   7.464457  -0.371 0.710567    
-as.factor(Warengruppe)4:as.factor(Wochentag)Freitag     -6.915912   7.521981  -0.919 0.357893    
-as.factor(Warengruppe)5:as.factor(Wochentag)Freitag      5.440366   7.464457   0.729 0.466118    
-as.factor(Warengruppe)6:as.factor(Wochentag)Freitag     -5.347496  13.983384  -0.382 0.702159    
-as.factor(Warengruppe)2:as.factor(Wochentag)Mittwoch    -2.574151   7.457789  -0.345 0.729979    
-as.factor(Warengruppe)3:as.factor(Wochentag)Mittwoch     1.612196   7.457789   0.216 0.828855    
-as.factor(Warengruppe)4:as.factor(Wochentag)Mittwoch     1.012140   7.528354   0.134 0.893054    
-as.factor(Warengruppe)5:as.factor(Wochentag)Mittwoch     8.321960   7.457789   1.116 0.264501    
-as.factor(Warengruppe)6:as.factor(Wochentag)Mittwoch     3.718987  14.113766   0.264 0.792170    
-as.factor(Warengruppe)2:as.factor(Wochentag)Montag      -3.495386   7.451613  -0.469 0.639024    
-as.factor(Warengruppe)3:as.factor(Wochentag)Montag      -9.830404   7.451613  -1.319 0.187120    
-as.factor(Warengruppe)4:as.factor(Wochentag)Montag     -12.559669   7.505429  -1.673 0.094275 .  
-as.factor(Warengruppe)5:as.factor(Wochentag)Montag     -14.920682   7.451613  -2.002 0.045273 *  
-as.factor(Warengruppe)6:as.factor(Wochentag)Montag     -17.963119  13.975996  -1.285 0.198721    
-as.factor(Warengruppe)2:as.factor(Wochentag)Samstag     97.294607   7.455655  13.050  &lt; 2e-16 ***
-as.factor(Warengruppe)3:as.factor(Wochentag)Samstag     31.137726   7.455655   4.176 2.99e-05 ***
-as.factor(Warengruppe)4:as.factor(Wochentag)Samstag    -21.482576   7.512164  -2.860 0.004249 ** 
-as.factor(Warengruppe)5:as.factor(Wochentag)Samstag     23.966489   7.455655   3.215 0.001310 ** 
-as.factor(Warengruppe)6:as.factor(Wochentag)Samstag    -19.219526  14.043543  -1.369 0.171163    
-as.factor(Warengruppe)2:as.factor(Wochentag)Sonntag    221.944545   7.467788  29.720  &lt; 2e-16 ***
-as.factor(Warengruppe)3:as.factor(Wochentag)Sonntag    113.064710   7.467788  15.140  &lt; 2e-16 ***
-as.factor(Warengruppe)4:as.factor(Wochentag)Sonntag     96.942437   7.499317  12.927  &lt; 2e-16 ***
-as.factor(Warengruppe)5:as.factor(Wochentag)Sonntag     96.801139   7.467788  12.962  &lt; 2e-16 ***
-as.factor(Warengruppe)6:as.factor(Wochentag)Sonntag     39.229140  13.924287   2.817 0.004851 ** 
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-Residual standard error: 64.69 on 10744 degrees of freedom
-  (81 observations deleted due to missingness)
-Multiple R-squared:  0.7962,    Adjusted R-squared:  0.7951 
-F-statistic: 723.9 on 58 and 10744 DF,  p-value: &lt; 2.2e-16</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubWFlKHZ1bXNhdHokVW1zYXR6LCBwcmVkaWN0KG1vZDIpKVxuYGBgIn0= -->
-<pre class="r"><code>mae(vumsatz$Umsatz, predict(mod2))</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiTMOkbmdlIGRlcyBsw6RuZ2VyZW4gT2JqZWt0ZXNcbiBcdCBpc3Qga2VpbiBWaWVsZmFjaGVzIGRlciBMw6RuZ2UgZGVzIGvDvHJ6ZXJlbiBPYmpla3Rlc1xuIn0= -->
-<pre><code>Länge des längeren Objektes
-     ist kein Vielfaches der Länge des kürzeren Objektes</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDU5LjY5Mjg5XG4ifQ== -->
-<pre><code>[1] 59.69289</code></pre>
-<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
@@ -1958,30 +1905,40 @@ umsatz_train &lt;- sample_frac(umsatz_train_org, .20)</code></pre>
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuI0JlcmVjaG5lbiB2b24gbGluZWFyZW0gTW9kZWxsXG5tb2QyIDwtIGxtKFVtc2F0eiB+IGFzLmZhY3RvcihXYXJlbmdydXBwZSkrVGVtcGVyYXR1ciAqIGFzLmZhY3RvcihXYXJlbmdydXBwZSkrICtEYXR1bSAgKiBhcy5mYWN0b3IoV2FyZW5ncnVwcGUpKyBhcy5mYWN0b3IoV29jaGVudGFnKSAqIGFzLmZhY3RvcihXYXJlbmdydXBwZSksIHVtc2F0el90cmFpbilcbm1hcGUodW1zYXR6X3RyYWluJFVtc2F0eiwgcHJlZGljdChtb2QyLG5ld19kYXRhPXVtc2F0el90cmFpbikpXG5cbiNFcnJlY2huZW4gZGVzIHN2bS1Nb2RlbGxzXG5zdm1fdHVuZSA8LSB0dW5lKHN2bSwgVW1zYXR6IH4gYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKStUZW1wZXJhdHVyKmFzLmZhY3RvcihXYXJlbmdydXBwZSkrRGF0dW0gICogYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKSsgYXMuZmFjdG9yKFdvY2hlbnRhZykgKiBhcy5mYWN0b3IoV2FyZW5ncnVwcGUpLCBkYXRhPXVtc2F0el90cmFpbixcbiAgICAgICAgICAgICAgICByYW5nZXMgPSBsaXN0KGVwc2lsb24gPSBzZXEoMC4xLDEsMC4xKSwgY29zdCA9IDJeKDA6MykpKVxuXG5cbiNFcnJlY2huZW4gZGVzIHJlbGF0aXZlbiBGZWhsZXJzIGbDvHIgVHJhaW5pbmdzZGF0ZW5cbnByZWRfYmVzdCA8LSBwcmVkaWN0KHN2bV90dW5lJGJlc3QubW9kZWwsIHVtc2F0el90cmFpbilcbm1hcGUodW1zYXR6X3RyYWluJFVtc2F0eiwgcHJlZF9iZXN0KVxuXG4jRXJyZWNobmVuIGRlcyByZWxhdGl2ZW4gRmVobGVycyBmw7xyIFRlc3RkYXRlblxudGVzdF9iZXN0IDwtIHByZWRpY3Qoc3ZtX3R1bmUkYmVzdC5tb2RlbCx1bXNhdHpfdGVzdClcbm1hcGUoIHVtc2F0el90ZXN0JFVtc2F0eiwgdGVzdF9iZXN0KVxuXG5cbmBgYCJ9 -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuI0JlcmVjaG5lbiB2b24gbGluZWFyZW0gTW9kZWxsXG5tb2QyIDwtIGxtKFVtc2F0eiB+IGFzLmZhY3RvcihXYXJlbmdydXBwZSkrVGVtcGVyYXR1ciAqIGFzLmZhY3RvcihXYXJlbmdydXBwZSkrICtEYXR1bSAgKiBhcy5mYWN0b3IoV2FyZW5ncnVwcGUpKyBhcy5mYWN0b3IoV29jaGVudGFnKSAqIGFzLmZhY3RvcihXYXJlbmdydXBwZSksIHVtc2F0el90cmFpbilcbm1hcGUodW1zYXR6X3RyYWluJFVtc2F0eiwgcHJlZGljdChtb2QyLG5ld19kYXRhPXVtc2F0el90cmFpbikpXG5gYGAifQ== -->
 <pre class="r"><code>#Berechnen von linearem Modell
 mod2 &lt;- lm(Umsatz ~ as.factor(Warengruppe)+Temperatur * as.factor(Warengruppe)+ +Datum  * as.factor(Warengruppe)+ as.factor(Wochentag) * as.factor(Warengruppe), umsatz_train)
-mape(umsatz_train$Umsatz, predict(mod2,new_data=umsatz_train))
-
-#Errechnen des svm-Modells
-svm_tune &lt;- tune(svm, Umsatz ~ as.factor(Warengruppe)+Temperatur*as.factor(Warengruppe)+Datum  * as.factor(Warengruppe)+ as.factor(Wochentag) * as.factor(Warengruppe), data=umsatz_train,
+mape(umsatz_train$Umsatz, predict(mod2,new_data=umsatz_train))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDAuMjI0NDIwMVxuIn0= -->
+<pre><code>[1] 0.2244201</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuI0VycmVjaG5lbiBkZXMgc3ZtLU1vZGVsbHNcbnN2bV90dW5lIDwtIHR1bmUoc3ZtLCBVbXNhdHogfiBhcy5mYWN0b3IoV2FyZW5ncnVwcGUpK2FzLmZhY3RvcihLaWVsZXJXb2NoZSkrYXMuZmFjdG9yKFdldHRlcikqYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKStUZW1wZXJhdHVyKmFzLmZhY3RvcihXYXJlbmdydXBwZSkrRGF0dW0gICogYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKSsgYXMuZmFjdG9yKFdvY2hlbnRhZykgKiBhcy5mYWN0b3IoV2FyZW5ncnVwcGUpLCBkYXRhPXVtc2F0el90cmFpbixcbiAgICAgICAgICAgICAgICByYW5nZXMgPSBsaXN0KGVwc2lsb24gPSBzZXEoMC4xLDEsMC4xKSwgY29zdCA9IDJeKDA6MykpKVxuXG5cbiNFcnJlY2huZW4gZGVzIHJlbGF0aXZlbiBGZWhsZXJzIGbDvHIgVHJhaW5pbmdzZGF0ZW5cbnByZWRfYmVzdCA8LSBwcmVkaWN0KHN2bV90dW5lJGJlc3QubW9kZWwsIHVtc2F0el90cmFpbilcbm1hcGUodW1zYXR6X3RyYWluJFVtc2F0eiwgcHJlZF9iZXN0KVxuYGBgIn0= -->
+<pre class="r"><code>#Errechnen des svm-Modells
+svm_tune &lt;- tune(svm, Umsatz ~ as.factor(Warengruppe)+as.factor(KielerWoche)+as.factor(Wetter)*as.factor(Warengruppe)+Temperatur*as.factor(Warengruppe)+Datum  * as.factor(Warengruppe)+ as.factor(Wochentag) * as.factor(Warengruppe), data=umsatz_train,
                 ranges = list(epsilon = seq(0.1,1,0.1), cost = 2^(0:3)))
 
 
 #Errechnen des relativen Fehlers für Trainingsdaten
 pred_best &lt;- predict(svm_tune$best.model, umsatz_train)
-mape(umsatz_train$Umsatz, pred_best)
-
-#Errechnen des relativen Fehlers für Testdaten
-test_best &lt;- predict(svm_tune$best.model,umsatz_test)
-mape( umsatz_test$Umsatz, test_best)
-</code></pre>
+mape(umsatz_train$Umsatz, pred_best)</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDAuMjEzNTc5N1xuIn0= -->
+<pre><code>[1] 0.2135797</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuI0VycmVjaG5lbiBkZXMgcmVsYXRpdmVuIEZlaGxlcnMgZsO8ciBUZXN0ZGF0ZW5cbnRlc3RfYmVzdCA8LSBwcmVkaWN0KHN2bV90dW5lJGJlc3QubW9kZWwsdW1zYXR6X3Rlc3QpXG5tYXBlKCB1bXNhdHpfdGVzdCRVbXNhdHosIHRlc3RfYmVzdClcbmBgYCJ9 -->
+<pre class="r"><code>#Errechnen des relativen Fehlers für Testdaten
+test_best &lt;- predict(svm_tune$best.model,umsatz_test)
+mape( umsatz_test$Umsatz, test_best)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDAuMjI5MjE0XG4ifQ== -->
+<pre><code>[1] 0.229214</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiUiBOb3RlYm9vayIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKCgpgYGB7cn0KCmxpYnJhcnkoZHBseXIpCmxpYnJhcnkocmVhZHIpCmxpYnJhcnkobHVicmlkYXRlKQpsaWJyYXJ5KGJyb29tKQpsaWJyYXJ5KE1ldHJpY3MpCgp1bXNhdHpkYXRlbiA8LSByZWFkX2NzdigidW1zYXR6ZGF0ZW5fZ2VrdWVyenQuY3N2IikKd2V0dGVyIDwtIHJlYWRfY3N2KCJ3ZXR0ZXIuY3N2IikKa2l3byA8LSByZWFkX2Nzdigia2l3by5jc3YiKQoKI1p1c2FtbWVuZsO8Z2VuIGRlciBEYXRlbiB1bmQgQW5mw7xnZW4gd2VpdGVyZXIgVmFyaWFibGVuCiNUZXN0CnZ1bXNhdHogPC0gbGVmdF9qb2luKHVtc2F0emRhdGVuLGtpd28pCnZ1bXNhdHpbaXMubmEodnVtc2F0eiRLaWVsZXJXb2NoZSksXSRLaWVsZXJXb2NoZTwtMAp2dW1zYXR6PWxlZnRfam9pbih2dW1zYXR6LHdldHRlcikKI0tvZGllcmVuIGRlcyBXZXR0ZXJzIGluIGVpbmVyIFZhcmlhYmxlbgp2dW1zYXR6JFdldHRlciA8LSAwCnZ1bXNhdHpbaXMubmEodnVtc2F0eiRXZXR0ZXJjb2RlKSxdJFdldHRlciA9IDEKdnVtc2F0eiRXb2NoZW50YWcgPC0gd2Vla2RheXMoYXMuRGF0ZSh2dW1zYXR6JERhdHVtKSkKCiNMw7ZzY2hlbiB2b24gWmVpbGVuIG1pdCBOQS1FaW50csOkZ2VuIG9kZXIgZXJzZXR6ZW4gZHVyY2ggdW5zaW5uaWdlIFdlcnRlCnZ1bXNhdHo9dnVtc2F0elshaXMubmEodnVtc2F0eiRUZW1wZXJhdHVyKSxdCnZ1bXNhdHpbaXMubmEodnVtc2F0eiRXZXR0ZXJjb2RlKSxdJFdldHRlcmNvZGU9LTEKdnVtc2F0eltpcy5uYSh2dW1zYXR6JEJld29lbGt1bmcpLF0kQmV3b2Vsa3VuZz0tMQoKI1Rlc3Rlbiwgb2IgRGF0ZW5zYXR6IE5BIGVudGjDpGx0CiNWaWV3KHZ1bXNhdHopCmFueShpcy5uYSh2dW1zYXR6JERhdHVtKSkKYW55KGlzLm5hKHZ1bXNhdHokVW1zYXR6KSkKYW55KGlzLm5hKHZ1bXNhdHokV2FyZW5ncnVwcGUpKQphbnkoaXMubmEodnVtc2F0eiRLaWVsZXJXb2NoZSkpCgphbnkoaXMubmEodnVtc2F0eiRUZW1wZXJhdHVyKSkKYW55KGlzLm5hKHZ1bXNhdHokQmV3b2Vsa3VuZykpCmFueShpcy5uYSh2dW1zYXR6JFdldHRlcmNvZGUpKQphbnkoaXMubmEodnVtc2F0eiRXaW5kZ2VzY2h3aW5kaWdrZWl0KSkKYW55KGlzLm5hKHZ1bXNhdHokV29jaGVudGFnKSkKYW55KGlzLm5hKHZ1bXNhdHokV2V0dGVyKSkKYGBgCmBgYHtyfQojIFp1ZmFsbHN6w6RobGVyIHNldHplbiAodW0gZGllIHp1ZsOkbGxpZ2UgUGFydGl0aW9uaWVydW5nIGJlaSBqZWRlbSBEdXJjaGxhdWYgZ2xlaWNoIHp1IGhhbHRlbikKc2V0LnNlZWQoMSkKCiMgWnVmw6RsbGlnZSBaaWVodW5nIEluZGl6ZXMgZsO8ciBkaWUgWmVpbGVuIGRlcyBEYXRlbnNhdHplcywgZGllIGRlbSBUcmFpbmluc2RhdGVuc2F0eiB6dWdlb3JkbmV0IHdlcmRlbgppbmRpY2VzX3RyYWluIDwtIHNhbXBsZShzZXFfbGVuKG5yb3codnVtc2F0eikpLCBzaXplID0gZmxvb3IoMC44MCAqIG5yb3codnVtc2F0eikpKQoKIyBEZWZpbml0aW9uIGRlcyBUcmFpbmluZ3MtIHVuZCBUZXN0ZGF0ZW5zYXR6IGR1cmNoIFNlbGVrdGlvbiBiencuIERlc2VsZWt0aW9uIGRlciBlbnRzcHJlY2hlbmRlbiBEYXRlbnplaWxlbgp1bXNhdHpfdHJhaW4gPC0gdW1zYXR6X3RyYWluX29yZyA8LSB2dW1zYXR6W2luZGljZXNfdHJhaW4sIF0KdW1zYXR6X3Rlc3QgPC0gdnVtc2F0elstaW5kaWNlc190cmFpbiwgXQpgYGAKCgpgYGB7cn0KI1ZlcmtsZWluZXJ1bmcgZGVzIERhdGVuc2F0emVzIHp1IFRlc3R6d2Vja2VuCnVtc2F0el90cmFpbiA8LSBzYW1wbGVfZnJhYyh1bXNhdHpfdHJhaW5fb3JnLCAuMjApCmBgYAoKCmBgYHtyfQojQmVyZWNobmVuIHZvbiBsaW5lYXJlbSBNb2RlbGwKbW9kMiA8LSBsbShVbXNhdHogfiBhcy5mYWN0b3IoV2FyZW5ncnVwcGUpK1RlbXBlcmF0dXIgKiBhcy5mYWN0b3IoV2FyZW5ncnVwcGUpKyArRGF0dW0gICogYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKSsgYXMuZmFjdG9yKFdvY2hlbnRhZykgKiBhcy5mYWN0b3IoV2FyZW5ncnVwcGUpLCB1bXNhdHpfdHJhaW4pCm1hcGUodW1zYXR6X3RyYWluJFVtc2F0eiwgcHJlZGljdChtb2QyLG5ld19kYXRhPXVtc2F0el90cmFpbikpCgojRXJyZWNobmVuIGRlcyBzdm0tTW9kZWxscwpzdm1fdHVuZSA8LSB0dW5lKHN2bSwgVW1zYXR6IH4gYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKStUZW1wZXJhdHVyKmFzLmZhY3RvcihXYXJlbmdydXBwZSkrRGF0dW0gICogYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKSsgYXMuZmFjdG9yKFdvY2hlbnRhZykgKiBhcy5mYWN0b3IoV2FyZW5ncnVwcGUpLCBkYXRhPXVtc2F0el90cmFpbiwKICAgICAgICAgICAgICAgIHJhbmdlcyA9IGxpc3QoZXBzaWxvbiA9IHNlcSgwLjEsMSwwLjEpLCBjb3N0ID0gMl4oMDozKSkpCgoKI0VycmVjaG5lbiBkZXMgcmVsYXRpdmVuIEZlaGxlcnMgZsO8ciBUcmFpbmluZ3NkYXRlbgpwcmVkX2Jlc3QgPC0gcHJlZGljdChzdm1fdHVuZSRiZXN0Lm1vZGVsLCB1bXNhdHpfdHJhaW4pCm1hcGUodW1zYXR6X3RyYWluJFVtc2F0eiwgcHJlZF9iZXN0KQoKI0VycmVjaG5lbiBkZXMgcmVsYXRpdmVuIEZlaGxlcnMgZsO8ciBUZXN0ZGF0ZW4KdGVzdF9iZXN0IDwtIHByZWRpY3Qoc3ZtX3R1bmUkYmVzdC5tb2RlbCx1bXNhdHpfdGVzdCkKbWFwZSggdW1zYXR6X3Rlc3QkVW1zYXR6LCB0ZXN0X2Jlc3QpCgoKYGBgCgo=</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiUiBOb3RlYm9vayIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKCgpgYGB7cn0KCmxpYnJhcnkoZHBseXIpCmxpYnJhcnkocmVhZHIpCmxpYnJhcnkobHVicmlkYXRlKQpsaWJyYXJ5KGJyb29tKQpsaWJyYXJ5KE1ldHJpY3MpCmxpYnJhcnkoZTEwNzEpCgp1bXNhdHpkYXRlbiA8LSByZWFkX2NzdigidW1zYXR6ZGF0ZW5fZ2VrdWVyenQuY3N2IikKd2V0dGVyIDwtIHJlYWRfY3N2KCJ3ZXR0ZXIuY3N2IikKa2l3byA8LSByZWFkX2Nzdigia2l3by5jc3YiKQoKI1p1c2FtbWVuZsO8Z2VuIGRlciBEYXRlbiB1bmQgQW5mw7xnZW4gd2VpdGVyZXIgVmFyaWFibGVuCiNUZXN0CnZ1bXNhdHogPC0gbGVmdF9qb2luKHVtc2F0emRhdGVuLGtpd28pCnZ1bXNhdHpbaXMubmEodnVtc2F0eiRLaWVsZXJXb2NoZSksXSRLaWVsZXJXb2NoZTwtMAp2dW1zYXR6PWxlZnRfam9pbih2dW1zYXR6LHdldHRlcikKI0tvZGllcmVuIGRlcyBXZXR0ZXJzIGluIGVpbmVyIFZhcmlhYmxlbgp2dW1zYXR6JFdldHRlciA8LSAwCnZ1bXNhdHpbaXMubmEodnVtc2F0eiRXZXR0ZXJjb2RlKSxdJFdldHRlciA9IDEKdnVtc2F0eiRXb2NoZW50YWcgPC0gd2Vla2RheXMoYXMuRGF0ZSh2dW1zYXR6JERhdHVtKSkKCiNMw7ZzY2hlbiB2b24gWmVpbGVuIG1pdCBOQS1FaW50csOkZ2VuIG9kZXIgZXJzZXR6ZW4gZHVyY2ggdW5zaW5uaWdlIFdlcnRlCnZ1bXNhdHo9dnVtc2F0elshaXMubmEodnVtc2F0eiRUZW1wZXJhdHVyKSxdCnZ1bXNhdHpbaXMubmEodnVtc2F0eiRXZXR0ZXJjb2RlKSxdJFdldHRlcmNvZGU9LTEKdnVtc2F0eltpcy5uYSh2dW1zYXR6JEJld29lbGt1bmcpLF0kQmV3b2Vsa3VuZz0tMQoKI1Rlc3Rlbiwgb2IgRGF0ZW5zYXR6IE5BIGVudGjDpGx0CiNWaWV3KHZ1bXNhdHopCmFueShpcy5uYSh2dW1zYXR6JERhdHVtKSkKYW55KGlzLm5hKHZ1bXNhdHokVW1zYXR6KSkKYW55KGlzLm5hKHZ1bXNhdHokV2FyZW5ncnVwcGUpKQphbnkoaXMubmEodnVtc2F0eiRLaWVsZXJXb2NoZSkpCgphbnkoaXMubmEodnVtc2F0eiRUZW1wZXJhdHVyKSkKYW55KGlzLm5hKHZ1bXNhdHokQmV3b2Vsa3VuZykpCmFueShpcy5uYSh2dW1zYXR6JFdldHRlcmNvZGUpKQphbnkoaXMubmEodnVtc2F0eiRXaW5kZ2VzY2h3aW5kaWdrZWl0KSkKYW55KGlzLm5hKHZ1bXNhdHokV29jaGVudGFnKSkKYW55KGlzLm5hKHZ1bXNhdHokV2V0dGVyKSkKYGBgCmBgYHtyfQojIFp1ZmFsbHN6w6RobGVyIHNldHplbiAodW0gZGllIHp1ZsOkbGxpZ2UgUGFydGl0aW9uaWVydW5nIGJlaSBqZWRlbSBEdXJjaGxhdWYgZ2xlaWNoIHp1IGhhbHRlbikKc2V0LnNlZWQoMSkKCiMgWnVmw6RsbGlnZSBaaWVodW5nIEluZGl6ZXMgZsO8ciBkaWUgWmVpbGVuIGRlcyBEYXRlbnNhdHplcywgZGllIGRlbSBUcmFpbmluc2RhdGVuc2F0eiB6dWdlb3JkbmV0IHdlcmRlbgppbmRpY2VzX3RyYWluIDwtIHNhbXBsZShzZXFfbGVuKG5yb3codnVtc2F0eikpLCBzaXplID0gZmxvb3IoMC44MCAqIG5yb3codnVtc2F0eikpKQoKIyBEZWZpbml0aW9uIGRlcyBUcmFpbmluZ3MtIHVuZCBUZXN0ZGF0ZW5zYXR6IGR1cmNoIFNlbGVrdGlvbiBiencuIERlc2VsZWt0aW9uIGRlciBlbnRzcHJlY2hlbmRlbiBEYXRlbnplaWxlbgp1bXNhdHpfdHJhaW4gPC0gdW1zYXR6X3RyYWluX29yZyA8LSB2dW1zYXR6W2luZGljZXNfdHJhaW4sIF0KdW1zYXR6X3Rlc3QgPC0gdnVtc2F0elstaW5kaWNlc190cmFpbiwgXQpgYGAKCgpgYGB7cn0KI1ZlcmtsZWluZXJ1bmcgZGVzIERhdGVuc2F0emVzIHp1IFRlc3R6d2Vja2VuCnVtc2F0el90cmFpbiA8LSBzYW1wbGVfZnJhYyh1bXNhdHpfdHJhaW5fb3JnLCAuMjApCmBgYAoKCmBgYHtyfQojQmVyZWNobmVuIHZvbiBsaW5lYXJlbSBNb2RlbGwKbW9kMiA8LSBsbShVbXNhdHogfiBhcy5mYWN0b3IoV2FyZW5ncnVwcGUpK1RlbXBlcmF0dXIgKiBhcy5mYWN0b3IoV2FyZW5ncnVwcGUpKyArRGF0dW0gICogYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKSsgYXMuZmFjdG9yKFdvY2hlbnRhZykgKiBhcy5mYWN0b3IoV2FyZW5ncnVwcGUpLCB1bXNhdHpfdHJhaW4pCm1hcGUodW1zYXR6X3RyYWluJFVtc2F0eiwgcHJlZGljdChtb2QyLG5ld19kYXRhPXVtc2F0el90cmFpbikpCgojRXJyZWNobmVuIGRlcyBzdm0tTW9kZWxscwpzdm1fdHVuZSA8LSB0dW5lKHN2bSwgVW1zYXR6IH4gYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKSthcy5mYWN0b3IoS2llbGVyV29jaGUpK2FzLmZhY3RvcihXZXR0ZXIpKmFzLmZhY3RvcihXYXJlbmdydXBwZSkrVGVtcGVyYXR1ciphcy5mYWN0b3IoV2FyZW5ncnVwcGUpK0RhdHVtICAqIGFzLmZhY3RvcihXYXJlbmdydXBwZSkrIGFzLmZhY3RvcihXb2NoZW50YWcpICogYXMuZmFjdG9yKFdhcmVuZ3J1cHBlKSwgZGF0YT11bXNhdHpfdHJhaW4sCiAgICAgICAgICAgICAgICByYW5nZXMgPSBsaXN0KGVwc2lsb24gPSBzZXEoMC4xLDEsMC4xKSwgY29zdCA9IDJeKDA6MykpKQoKCiNFcnJlY2huZW4gZGVzIHJlbGF0aXZlbiBGZWhsZXJzIGbDvHIgVHJhaW5pbmdzZGF0ZW4KcHJlZF9iZXN0IDwtIHByZWRpY3Qoc3ZtX3R1bmUkYmVzdC5tb2RlbCwgdW1zYXR6X3RyYWluKQptYXBlKHVtc2F0el90cmFpbiRVbXNhdHosIHByZWRfYmVzdCkKCiNFcnJlY2huZW4gZGVzIHJlbGF0aXZlbiBGZWhsZXJzIGbDvHIgVGVzdGRhdGVuCnRlc3RfYmVzdCA8LSBwcmVkaWN0KHN2bV90dW5lJGJlc3QubW9kZWwsdW1zYXR6X3Rlc3QpCm1hcGUoIHVtc2F0el90ZXN0JFVtc2F0eiwgdGVzdF9iZXN0KQoKCmBgYAoK</div>
 
 
 
