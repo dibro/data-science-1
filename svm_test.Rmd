@@ -19,15 +19,25 @@ library(ggplot2)
 umsatzdaten <- read_csv("umsatzdaten_gekuerzt.csv")
 wetter <- read_csv("wetter.csv")
 kiwo <- read_csv("kiwo.csv")
+feiertage <- read_delim("feiertage.csv", 
+    ";", escape_double = FALSE, trim_ws = TRUE)
+
 
 #Zusammenfügen der Daten und Anfügen weiterer Variablen
 #Test
 vumsatz <- left_join(umsatzdaten,kiwo)
 vumsatz[is.na(vumsatz$KielerWoche),]$KielerWoche<-0
 vumsatz=left_join(vumsatz,wetter)
+#View(feiertage)
+#View(vumsatz)
+vumsatz=left_join(vumsatz,feiertage)
+vumsatz=subset(vumsatz,select=-c(Heiligerabend_dummy,Silvester_dummy))
 #Kodieren des Wetters in einer Variablen
 vumsatz$Wetter <- 0
 vumsatz[is.na(vumsatz$Wettercode),]$Wetter = 1
+vumsatz$Feiertag_Ja=0
+vumsatz[is.na(vumsatz$Feiertag),]$Feiertag_Ja = 1
+vumsatz[is.na(vumsatz$Feiertag),]$Feiertag = "Nein"
 vumsatz$Wochentag <- weekdays(as.Date(vumsatz$Datum))
 
 #Löschen von Zeilen mit NA-Einträgen oder ersetzen durch unsinnige Werte
@@ -49,6 +59,8 @@ any(is.na(vumsatz$Windgeschwindigkeit))
 any(is.na(vumsatz$Wochentag))
 any(is.na(vumsatz$Wetter))
 any(is.na(vumsatz$Tag))
+any(is.na(vumsatz$Feiertag))
+any(is.na(vumsatz$Feiertag_Ja))
 ```
 ```{r}
 # Zufallszähler setzen (um die zufällige Partitionierung bei jedem Durchlauf gleich zu halten)
@@ -64,7 +76,7 @@ umsatz_test <- vumsatz[-indices_train, ]
 
 #Verkleinerung des Datensatzes zu Testzwecken
 #umsatz_train <- sample_frac(umsatz_train_org, .50)
-warengruppe=1
+warengruppe=5
 umsatz_train=umsatz_train[umsatz_train$Warengruppe==warengruppe,]
 umsatz_test=umsatz_test[umsatz_test$Warengruppe==warengruppe,]
 ```
@@ -80,9 +92,9 @@ umsatz_test=umsatz_test[umsatz_test$Warengruppe==warengruppe,]
                 #ranges = list(epsilon = seq(0.1,1,0.1), cost = 2^(0:3)))
 
 
-mod2 <- lm(Umsatz ~ Temperatur+as.factor(KielerWoche) + as.factor(Wochentag)+as.factor(Wetter)+Tag+Bewoelkung, umsatz_train)
+mod2 <- lm(Umsatz ~ as.factor(Feiertag_Ja)+Temperatur+as.factor(KielerWoche) + as.factor(Wochentag)+as.factor(Wetter)+Tag+Bewoelkung, umsatz_train)
 mape(umsatz_train$Umsatz, predict(mod2,new_data=umsatz_train))
-svm_tune <- tune(svm, Umsatz ~ as.factor(KielerWoche)+as.factor(Wetter)+Temperatur+Tag  + as.factor(Wochentag) + Bewoelkung , data=umsatz_train,ranges = list(epsilon = seq(0.1,1,0.1), cost = 2^(0:3)))
+svm_tune <- tune(svm, Umsatz ~as.factor(Feiertag_Ja)+ as.factor(KielerWoche)+as.factor(Wetter)+Temperatur+Tag  + as.factor(Wochentag) + Bewoelkung , data=umsatz_train,ranges = list(epsilon = seq(0.1,1,0.1), cost = 2^(0:3)))
 
 
 #Errechnen des relativen Fehlers für Trainingsdaten
@@ -99,7 +111,7 @@ mape( umsatz_test$Umsatz, test_best)
 
 vumsatz_plot<-vumsatz[vumsatz$Warengruppe==warengruppe,]
 vumsatz_plot$Jahr = year(as.Date(vumsatz_plot$Datum))
-vumsatz_plot=vumsatz_plot[vumsatz_plot$Jahr==2016,]
+#vumsatz_plot=vumsatz_plot[vumsatz_plot$Jahr==2016,]
 vumsatz_plot$svm<-predict(svm_tune$best.model,vumsatz_plot)
 ggplot(vumsatz_plot) + geom_point(aes(x=Datum,y=Umsatz,color="red"))+geom_line(aes(x=Datum,y=svm))
 ```
