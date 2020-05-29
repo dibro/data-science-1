@@ -15,6 +15,7 @@ library(Metrics)
 library(e1071)
 library(ggplot2)
 
+
 umsatzdaten <- read_csv("umsatzdaten_gekuerzt.csv")
 wetter <- read_csv("wetter.csv")
 kiwo <- read_csv("kiwo.csv")
@@ -34,7 +35,6 @@ vumsatz=vumsatz[!is.na(vumsatz$Temperatur),]
 vumsatz[is.na(vumsatz$Wettercode),]$Wettercode=-1
 vumsatz[is.na(vumsatz$Bewoelkung),]$Bewoelkung=-1
 vumsatz$Tag = yday(as.Date(vumsatz$Datum))
-
 #Testen, ob Datensatz NA enthält
 #View(vumsatz)
 any(is.na(vumsatz$Datum))
@@ -61,6 +61,7 @@ indices_train <- sample(seq_len(nrow(vumsatz)), size = floor(0.80 * nrow(vumsatz
 umsatz_train <- umsatz_train_org <- vumsatz[indices_train, ]
 umsatz_test <- vumsatz[-indices_train, ]
 
+
 #Verkleinerung des Datensatzes zu Testzwecken
 #umsatz_train <- sample_frac(umsatz_train_org, .50)
 warengruppe=1
@@ -81,8 +82,7 @@ umsatz_test=umsatz_test[umsatz_test$Warengruppe==warengruppe,]
 
 mod2 <- lm(Umsatz ~ Temperatur+as.factor(KielerWoche) + as.factor(Wochentag)+as.factor(Wetter)+Tag+Bewoelkung, umsatz_train)
 mape(umsatz_train$Umsatz, predict(mod2,new_data=umsatz_train))
-svm_tune <- tune(svm, Umsatz ~ as.factor(KielerWoche)+as.factor(Wetter)+Temperatur+Tag  + as.factor(Wochentag) + Bewoelkung , data=umsatz_train,
-                ranges = list(epsilon = seq(0.1,1,0.1), cost = 2^(0:3)))
+svm_tune <- tune(svm, Umsatz ~ as.factor(KielerWoche)+as.factor(Wetter)+Temperatur+Tag  + as.factor(Wochentag) + Bewoelkung , data=umsatz_train,ranges = list(epsilon = seq(0.1,1,0.1), cost = 2^(0:3)))
 
 
 #Errechnen des relativen Fehlers für Trainingsdaten
@@ -93,6 +93,7 @@ mape(umsatz_train$Umsatz, pred_best)
 test_best <- predict(svm_tune$best.model,umsatz_test)
 mape( umsatz_test$Umsatz, test_best)
 
+
 #plot(vumsatz[vumsatz$Warengruppe==2,]$Datum, vumsatz[vumsatz$Warengruppe==2,]$Umsatz,type="l")
 #plot(vumsatz[vumsatz$Warengruppe==2,]$Datum, predict(svm_tune$best.model,vumsatz[vumsatz$Warengruppe==2,]),type="l",color="red",add=TRUE)
 
@@ -101,6 +102,5 @@ vumsatz_plot$Jahr = year(as.Date(vumsatz_plot$Datum))
 vumsatz_plot=vumsatz_plot[vumsatz_plot$Jahr==2016,]
 vumsatz_plot$svm<-predict(svm_tune$best.model,vumsatz_plot)
 ggplot(vumsatz_plot) + geom_point(aes(x=Datum,y=Umsatz,color="red"))+geom_line(aes(x=Datum,y=svm))
-
 ```
 
