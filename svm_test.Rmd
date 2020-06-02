@@ -61,6 +61,25 @@ any(is.na(vumsatz$Wetter))
 any(is.na(vumsatz$Tag))
 any(is.na(vumsatz$Feiertag))
 any(is.na(vumsatz$Feiertag_Ja))
+
+data_predict=left_join(wetter,kiwo)
+data_predict=left_join(data_predict,umsatzdaten)
+data_predict=left_join(data_predict,feiertage)
+data_predict=subset(data_predict,select=-c(Heiligerabend_dummy,Silvester_dummy))
+data_predict$Wetter <- 0
+data_predict[is.na(data_predict$Wettercode),]$Wetter = 1
+data_predict$Feiertag_Ja=0
+data_predict[is.na(data_predict$Feiertag),]$Feiertag_Ja = 1
+data_predict[is.na(data_predict$Feiertag),]$Feiertag = "Nein"
+data_predict$Wochentag <- weekdays(as.Date(data_predict$Datum))
+data_predict=data_predict[!is.na(data_predict$Temperatur),]
+data_predict[is.na(data_predict$Wettercode),]$Wettercode=-1
+data_predict[is.na(data_predict$Bewoelkung),]$Bewoelkung=-1
+data_predict$Tag = yday(as.Date(data_predict$Datum))
+data_predict[is.na(data_predict$Umsatz),]$Umsatz=0
+data_predict[is.na(data_predict$Warengruppe),]$Warengruppe=0
+data_predict[is.na(data_predict$KielerWoche),]$KielerWoche<-0
+day_predict <-data.frame("Datum" = "2019-04-06","Warengruppe"=1,"Umsatz"=0,"KielerWoche"=0,"Bewoelkung"=0,"Temperatur"=12.8,"Windgeschwindigkeit"=10,"Wettercode"=10,"Feiertag"="Nein","Wetter"=0,"Feiertag_Ja"=0,"Wochentag"="Samstag","Tag"=96)
 ```
 ```{r}
 # Zufallszähler setzen (um die zufällige Partitionierung bei jedem Durchlauf gleich zu halten)
@@ -76,25 +95,31 @@ umsatz_test <- vumsatz[-indices_train, ]
 
 #Verkleinerung des Datensatzes zu Testzwecken
 #umsatz_train <- sample_frac(umsatz_train_org, .50)
-warengruppe=5
-umsatz_train=umsatz_train[umsatz_train$Warengruppe==warengruppe,]
-umsatz_test=umsatz_test[umsatz_test$Warengruppe==warengruppe,]
+# warengruppe=1
+# umsatz_train=umsatz_train[umsatz_train$Warengruppe==warengruppe,]
+# umsatz_test=umsatz_test[umsatz_test$Warengruppe==warengruppe,]
 ```
 
 
 ```{r}
 #Berechnen von linearem Modell
-#mod2 <- lm(Umsatz ~ as.factor(Warengruppe)+Temperatur * as.factor(Warengruppe)+ +Datum  * as.factor(Warengruppe)+ as.factor(Wochentag) * as.factor(Warengruppe), umsatz_train)
-#mape(umsatz_train$Umsatz, predict(mod2,new_data=umsatz_train))
+# mod2 <-
+#   lm(
+#     Umsatz ~ as.factor(Feiertag_Ja) + Temperatur + as.factor(KielerWoche) + as.factor(Wochentag) +
+#       as.factor(Wetter) + Tag + Bewoelkung,
+#     umsatz_train
+#   )
+# 
+# mape(umsatz_train$Umsatz, predict(mod2, new_data = umsatz_train))
 
-#Errechnen des svm-Modells
-#svm_tune <- tune(svm, Umsatz ~ as.factor(Warengruppe)+as.factor(KielerWoche)+as.factor(Wetter)*as.factor(Warengruppe)+Temperatur*as.factor(Warengruppe)+Datum  * as.factor(Warengruppe)+ as.factor(Wochentag) * as.factor(Warengruppe), data=umsatz_train,
-                #ranges = list(epsilon = seq(0.1,1,0.1), cost = 2^(0:3)))
-
-
-mod2 <- lm(Umsatz ~ as.factor(Feiertag_Ja)+Temperatur+as.factor(KielerWoche) + as.factor(Wochentag)+as.factor(Wetter)+Tag+Bewoelkung, umsatz_train)
-mape(umsatz_train$Umsatz, predict(mod2,new_data=umsatz_train))
-svm_tune <- tune(svm, Umsatz ~as.factor(Feiertag_Ja)+ as.factor(KielerWoche)+as.factor(Wetter)+Temperatur+Tag  + as.factor(Wochentag) + Bewoelkung , data=umsatz_train,ranges = list(epsilon = seq(0.1,1,0.1), cost = 2^(0:3)))
+#Berechnung des svm Modells
+svm_tune <-
+  tune(
+    svm,
+    Umsatz ~ as.factor(KielerWoche) + as.factor(Wetter) + Temperatur + as.Date(Datum)  + as.factor(Wochentag) + Bewoelkung ,
+    data = umsatz_train,
+    ranges = list(epsilon = seq(0.1, 1, 0.1), cost = 2 ^ (0:3))
+  )
 
 
 #Errechnen des relativen Fehlers für Trainingsdaten
@@ -102,17 +127,108 @@ pred_best <- predict(svm_tune$best.model, umsatz_train)
 mape(umsatz_train$Umsatz, pred_best)
 
 #Errechnen des relativen Fehlers für Testdaten
-test_best <- predict(svm_tune$best.model,umsatz_test)
-mape( umsatz_test$Umsatz, test_best)
+test_best <- predict(svm_tune$best.model, umsatz_test)
+mape(umsatz_test$Umsatz, test_best)
 
-
-#plot(vumsatz[vumsatz$Warengruppe==2,]$Datum, vumsatz[vumsatz$Warengruppe==2,]$Umsatz,type="l")
-#plot(vumsatz[vumsatz$Warengruppe==2,]$Datum, predict(svm_tune$best.model,vumsatz[vumsatz$Warengruppe==2,]),type="l",color="red",add=TRUE)
-
-vumsatz_plot<-vumsatz[vumsatz$Warengruppe==warengruppe,]
+#Darstellen der Daten
+vumsatz_plot <- vumsatz[vumsatz$Warengruppe == warengruppe, ]
 vumsatz_plot$Jahr = year(as.Date(vumsatz_plot$Datum))
-#vumsatz_plot=vumsatz_plot[vumsatz_plot$Jahr==2016,]
-vumsatz_plot$svm<-predict(svm_tune$best.model,vumsatz_plot)
-ggplot(vumsatz_plot) + geom_point(aes(x=Datum,y=Umsatz,color="red"))+geom_line(aes(x=Datum,y=svm))
+vumsatz_plot$svm <- predict(svm_tune$best.model, vumsatz_plot)
+ggplot(vumsatz_plot) + geom_point(aes(x = Datum, y = Umsatz, color = "red")) +
+  geom_line(aes(x = Datum, y = svm))
+```
+```{r}
+vumsatz1<-predict(svm_tune$best.model,data_predict)
+vumsatz1[data_predict$Datum=="2019-06-04"]
+data_predict[data_predict$Datum=="2019-06-04",]
+```
+
+```{r}
+
+warengruppe=1
+umsatz_trainw=umsatz_train[umsatz_train$Warengruppe==warengruppe,]
+umsatz_testw=umsatz_test[umsatz_test$Warengruppe==warengruppe,]
+svm_tune1 <-
+  tune(
+    svm,
+    Umsatz ~  as.factor(KielerWoche) + as.factor(Wetter) + Temperatur + as.Date(Datum)  + as.factor(Wochentag) + Bewoelkung ,
+    data = umsatz_trainw,
+    ranges = list(epsilon = seq(0.1, 1, 0.1), cost = 2 ^ (0:3))
+  )
+
+
+warengruppe=2
+umsatz_trainw=umsatz_train[umsatz_train$Warengruppe==warengruppe,]
+umsatz_testw=umsatz_test[umsatz_test$Warengruppe==warengruppe,]
+svm_tune2 <-
+  tune(
+    svm,
+    Umsatz ~ as.factor(KielerWoche) + as.factor(Wetter) + Temperatur + as.Date(Datum)  + as.factor(Wochentag) + Bewoelkung ,
+    data = umsatz_trainw,
+    ranges = list(epsilon = seq(0.1, 1, 0.1), cost = 2 ^ (0:3))
+  )
+
+
+warengruppe=3
+umsatz_trainw=umsatz_train[umsatz_train$Warengruppe==warengruppe,]
+umsatz_testw=umsatz_test[umsatz_test$Warengruppe==warengruppe,]
+svm_tune3 <-
+  tune(
+    svm,
+    Umsatz ~ as.factor(KielerWoche) + as.factor(Wetter) + Temperatur + as.Date(Datum)  + as.factor(Wochentag) + Bewoelkung ,
+    data = umsatz_trainw,
+    ranges = list(epsilon = seq(0.1, 1, 0.1), cost = 2 ^ (0:3))
+  )
+
+
+warengruppe=4
+umsatz_trainw=umsatz_train[umsatz_train$Warengruppe==warengruppe,]
+umsatz_testw=umsatz_test[umsatz_test$Warengruppe==warengruppe,]
+svm_tune4 <-
+  tune(
+    svm,
+    Umsatz ~ as.factor(KielerWoche) + as.factor(Wetter) + Temperatur + as.Date(Datum)  + as.factor(Wochentag) + Bewoelkung ,
+    data = umsatz_trainw,
+    ranges = list(epsilon = seq(0.1, 1, 0.1), cost = 2 ^ (0:3))
+  )
+
+
+warengruppe=5
+umsatz_trainw=umsatz_train[umsatz_train$Warengruppe==warengruppe,]
+umsatz_testw=umsatz_test[umsatz_test$Warengruppe==warengruppe,]
+svm_tune5<-
+  tune(
+    svm,
+    Umsatz ~ as.factor(KielerWoche) + as.factor(Wetter) + Temperatur + as.Date(Datum)  + as.factor(Wochentag) + Bewoelkung ,
+    data = umsatz_trainw,
+    ranges = list(epsilon = seq(0.1, 1, 0.1), cost = 2 ^ (0:3))
+  )
+
+# warengruppe=6
+# umsatz_trainw=umsatz_train[umsatz_train$Warengruppe==warengruppe,]
+# umsatz_testw=umsatz_test[umsatz_test$Warengruppe==warengruppe,]
+# svm_tune6 <-
+#   tune(
+#     svm,
+#     Umsatz ~as.factor(KielerWoche) + as.factor(Wetter) + Temperatur + as.Date(Datum)  + as.factor(Wochentag) + Bewoelkung ,
+#     data = umsatz_trainw,
+#     ranges = list(epsilon = seq(0.1, 1, 0.1), cost = 2 ^ (0:3))
+#   )
+
+
+
+```
+
+```{r}
+vumsatz1<-predict(svm_tune1$best.model,data_predict)
+vumsatz2<-predict(svm_tune2$best.model,data_predict)
+vumsatz3<-predict(svm_tune3$best.model,data_predict)
+vumsatz4<-predict(svm_tune4$best.model,data_predict)
+vumsatz5<-predict(svm_tune5$best.model,data_predict)
+#vumsatz6<-predict(svm_tune6$best.model,data_predict)
+
+Umsatz_predict = c(vumsatz1[data_predict$Datum=="2019-06-04"],vumsatz2[data_predict$Datum=="2019-06-04"],vumsatz3[data_predict$Datum=="2019-06-04"],vumsatz4[data_predict$Datum=="2019-06-04"],vumsatz5[data_predict$Datum=="2019-06-04"])
+print(Umsatz_predict)
+print(sum(Umsatz_predict))
 ```
 
