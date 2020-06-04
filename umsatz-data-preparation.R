@@ -71,6 +71,19 @@ wetter <- read_csv("wetter.csv")
 numsatz <- left_join(umsatzdaten,wetter)
 numsatz$Wochentag <- weekdays(as.Date(numsatz$Datum))
 
+numsatz=numsatz[!is.na(numsatz$Temperatur),]
+numsatz[is.na(numsatz$Wettercode),]$Wettercode=-1
+numsatz[is.na(numsatz$Bewoelkung),]$Bewoelkung=-1
+
+any(is.na(numsatz$Datum))
+any(is.na(numsatz$Umsatz))
+any(is.na(numsatz$Warengruppe))
+any(is.na(numsatz$Temperatur))
+any(is.na(numsatz$Bewoelkung))
+any(is.na(numsatz$Wettercode))
+any(is.na(numsatz$Windgeschwindigkeit))
+any(is.na(numsatz$Wochentag))
+
 ###################################################
 ### Datenaufbereitung ####
 
