@@ -86,7 +86,7 @@ numsatz_dummy = dummy_cols(numsatz, dummy_list)
 
 Warengruppe_dummies = c('Warengruppe_1', 'Warengruppe_2', 'Warengruppe_3', 'Warengruppe_4', 'Warengruppe_5', 'Warengruppe_6')
 #Wochentag_dummies = c('Wochentag_1', 'Wochentag_2', 'Wochentag_3', 'Wochentag_4', 'Wochentag_5', 'WWochentag_6', 'WWochentag_7')
-Wochentag_dummies = c('Wochentag_Montag', 'Wochentag_Dienstag', 'Wochentag_Mittwoch', 'Wochentag_Donnerstag', 'Wochentag_Freitag', 'Wochentag_Samstag', 'Wochentag_Sonntag')
+Wochentag_dummies = c('Wochentag_Monday', 'Wochentag_Tuesday', 'Wochentag_Wednesday', 'Wochentag_Thursday', 'Wochentag_Friday', 'Wochentag_Saturday', 'Wochentag_Sunday')
 
 
 # Standardisierung aller Feature Variablen und der Label Variable
