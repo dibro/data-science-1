@@ -79,7 +79,51 @@ data_predict$Tag = yday(as.Date(data_predict$Datum))
 data_predict[is.na(data_predict$Umsatz),]$Umsatz=0
 data_predict[is.na(data_predict$Warengruppe),]$Warengruppe=0
 data_predict[is.na(data_predict$KielerWoche),]$KielerWoche<-0
-#day_predict <-data.frame("Datum" = "2019-04-06","Warengruppe"=1,"Umsatz"=0,"KielerWoche"=0,"Bewoelkung"=0,"Temperatur"=12.8,"Windgeschwindigkeit"=10,"Wettercode"=10,"Feiertag"="Nein","Wetter"=0,"Feiertag_Ja"=0,"Wochentag"="Samstag","Tag"=96)
+
+
+
+temptest = vumsatz
+temptest$Jahr = year(as.Date(temptest$Datum))
+temptest$Monat = month(as.Date(temptest$Datum))
+
+Jahre = seq(2013,2019)
+Monate = seq(1,12)
+
+temptest$T_Abweichung = 0
+for(j in 1:7){
+  for(i in 1:12){
+    for(k in 1:6){
+      selected_data = temptest$Warengruppe == k & temptest$Jahr == 2012+j & temptest$Monat == i
+      data = temptest[selected_data,]
+      temp_mean = mean(data$Temperatur)
+      temptest[selected_data,]$T_Abweichung = temptest[selected_data,]$Temperatur-temp_mean
+    }
+  }
+}
+
+vumsatz$T_Abweichung = temptest$T_Abweichung
+
+temptest = data_predict
+temptest$Jahr = year(as.Date(temptest$Datum))
+temptest$Monat = month(as.Date(temptest$Datum))
+
+Jahre = seq(2013,2019)
+Monate = seq(1,12)
+
+temptest$T_Abweichung = 0
+for(j in 1:7){
+  for(i in 1:12){
+    for(k in 1:6){
+      selected_data = temptest$Warengruppe == k & temptest$Jahr == 2012+j & temptest$Monat == i
+      data = temptest[selected_data,]
+      temp_mean = mean(data$Temperatur)
+      temptest[selected_data,]$T_Abweichung = temptest[selected_data,]$Temperatur-temp_mean
+    }
+  }
+}
+
+data_predict$T_Abweichung = temptest$T_Abweichung
+
 ```
 ```{r}
 # Zufallszähler setzen (um die zufällige Partitionierung bei jedem Durchlauf gleich zu halten)
@@ -116,7 +160,7 @@ umsatz_train <- sample_frac(umsatz_train_org, .20)
 svm_tune <-
   tune(
     svm,
-    Umsatz ~ as.factor(KielerWoche)+ as.factor(Wetter)*as.factor(Warengruppe) + Temperatur*as.factor(Warengruppe) + as.Date(Datum)*as.factor(Warengruppe)  + as.factor(Wochentag)*as.factor(Warengruppe),
+    Umsatz ~ as.factor(KielerWoche)+ as.factor(Wetter)*as.factor(Warengruppe) + Temperatur*as.factor(Warengruppe) + as.Date(Datum)*as.factor(Warengruppe)  + as.factor(Wochentag)*as.factor(Warengruppe)+T_Abweichung*as.factor(Warengruppe),
     data = umsatz_train,
     ranges = list(epsilon = seq(0.1, 1, 0.1), cost = 2 ^ (0:3))
   )
@@ -139,28 +183,61 @@ ggplot(vumsatz_plot) + geom_point(aes(x = Datum, y = Umsatz, color = "red")) +
 ```
 ```{r}
 
-mape(vumsatz[vumsatz$Warengruppe==1,]$Umsatz, predict(svm_tune$best.model, vumsatz)[vumsatz$Warengruppe==1])
-mape(vumsatz[vumsatz$Warengruppe==2,]$Umsatz, predict(svm_tune$best.model, vumsatz)[vumsatz$Warengruppe==2])
-mape(vumsatz[vumsatz$Warengruppe==3,]$Umsatz, predict(svm_tune$best.model, vumsatz)[vumsatz$Warengruppe==3])
-mape(vumsatz[vumsatz$Warengruppe==4,]$Umsatz, predict(svm_tune$best.model, vumsatz)[vumsatz$Warengruppe==4])
-mape(vumsatz[vumsatz$Warengruppe==5,]$Umsatz, predict(svm_tune$best.model, vumsatz)[vumsatz$Warengruppe==5])
-mape(vumsatz[vumsatz$Warengruppe==6,]$Umsatz, predict(svm_tune$best.model, vumsatz)[vumsatz$Warengruppe==6])
 
-vumsatz1<-predict(svm_tune$best.model,data_predict)
-vumsatz1[data_predict$Datum=="2019-06-04"]
-data_predict[data_predict$Datum=="2019-06-04",]
+# mape(vumsatz[vumsatz$Warengruppe==2,]$Umsatz, predict(svm_tune$best.model, vumsatz)[vumsatz$Warengruppe==2])
+# mape(vumsatz[vumsatz$Warengruppe==3,]$Umsatz, predict(svm_tune$best.model, vumsatz)[vumsatz$Warengruppe==3])
+# mape(vumsatz[vumsatz$Warengruppe==4,]$Umsatz, predict(svm_tune$best.model, vumsatz)[vumsatz$Warengruppe==4])
+# mape(vumsatz[vumsatz$Warengruppe==5,]$Umsatz, predict(svm_tune$best.model, vumsatz)[vumsatz$Warengruppe==5])
+# mape(vumsatz[vumsatz$Warengruppe==6,]$Umsatz, predict(svm_tune$best.model, vumsatz)[vumsatz$Warengruppe==6])
+
+
+ #Umsatz ~ as.factor(KielerWoche)+ as.factor(Wetter)*as.factor(Warengruppe) + Temperatur*as.factor(Warengruppe) + as.Date(Datum)*as.factor(Warengruppe)  + as.factor(Wochentag)*as.factor(Warengruppe),
+ 
+
+dumsatz = NULL
+umsatz_error = NULL
+for(warengruppe in 1:5){
+  gdata_predict=data_predict
+  gdata_predict[gdata_predict$Warengruppe==0,]$Warengruppe=warengruppe
+  #gdata_predict=subset(data_predict,select=c(Datum,Wetter,Warengruppe,KielerWoche,Temperatur,Wochentag,Umsatz))
+  vumsatz1<-predict(svm_tune$best.model,gdata_predict)
+  dumsatz=rbind(dumsatz,vumsatz1[gdata_predict$Datum=="2019-06-04"])
+  umsatz_error = rbind(umsatz_error,mape(vumsatz[vumsatz$Warengruppe==warengruppe,]$Umsatz, predict(svm_tune$best.model, vumsatz)[vumsatz$Warengruppe==warengruppe]))
+}
+
+umsatz_error = rbind(umsatz_error,mape(vumsatz[vumsatz$Warengruppe==6,]$Umsatz, predict(svm_tune$best.model, vumsatz)[vumsatz$Warengruppe==6]))
 ```
 
 ```{r}
-vumsatz1<-predict(svm_tune1$best.model,data_predict)
-vumsatz2<-predict(svm_tune2$best.model,data_predict)
-vumsatz3<-predict(svm_tune3$best.model,data_predict)
-vumsatz4<-predict(svm_tune4$best.model,data_predict)
-vumsatz5<-predict(svm_tune5$best.model,data_predict)
-#vumsatz6<-predict(svm_tune6$best.model,data_predict)
 
-Umsatz_predict = c(vumsatz1[data_predict$Datum=="2019-06-04"],vumsatz2[data_predict$Datum=="2019-06-04"],vumsatz3[data_predict$Datum=="2019-06-04"],vumsatz4[data_predict$Datum=="2019-06-04"],vumsatz5[data_predict$Datum=="2019-06-04"])
-print(Umsatz_predict)
-print(sum(Umsatz_predict))
+data <- data.frame(
+  name=c(1,2,3,4,5,6),
+  value=umsatz_error
+)
+
+# Uniform color
+xx<-barplot(height=data$value, names=data$name, 
+        col=rgb(0.8,0.1,0.1,0.6),
+        xlab="Warengruppe", 
+        ylab="MAPE", 
+        main="MAPE svm je Warengruppe", 
+        ylim=c(0,1)
+        )
+
+text(x = xx, y = data$value, label = round(data$value,digits=2), pos = 3, cex = 0.8, col = "red")
+
+```
+
+```{r}
+# create a dataset
+Methode <- c(rep("svm" , 5) )
+Warengruppe <- rep(c("1" , "2" , "3", "4", "5"),1) 
+Wert <- dumsatz
+data <- data.frame(specie,Warengruppe,Wert)
+ 
+# Stacked
+ggplot(data, aes(fill=Warengruppe, y=Wert, x=Methode,label =round(Wert,digits=1))) + 
+    geom_bar(position="stack", stat="identity")+
+  geom_text(size = 3, position = position_stack(vjust = 0.5))
 ```
 
