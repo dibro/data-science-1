@@ -1750,113 +1750,273 @@ summary {
 
 <!-- rnb-text-begin -->
 <div id="section" class="section level51">
-<p></p>
+<p class="heading"></p>
 </div>
 <div id="vorbereitung-der-umgebung" class="section level3">
 <h3>Vorbereitung der Umgebung</h3>
-</div>
-<div id="falls-nicht-installiert-ggf.-folgendes-paket-ausführen" class="section level1">
-<h1>Falls nicht installiert ggf. folgendes Paket ausführen</h1>
-<p>#install.packages(“fastDummies”)</p>
-</div>
-<div id="umgebungsvariablen-löschen" class="section level1">
-<h1>Umgebungsvariablen löschen</h1>
-<p>remove(list = ls())</p>
-</div>
-<div id="einbinden-benötigter-funktionsbibliotheken" class="section level1">
-<h1>Einbinden benötigter Funktionsbibliotheken</h1>
-<p>library(readr) library(fastDummies)</p>
-<p>library(dplyr)</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBGYWxscyBuaWNodCBpbnN0YWxsaWVydCBnZ2YuIGZvbGdlbmRlcyBQYWtldCBhdXNmw7xocmVuXG4jaW5zdGFsbC5wYWNrYWdlcyhcImZhc3REdW1taWVzXCIpXG5cbiMgVW1nZWJ1bmdzdmFyaWFibGVuIGzDtnNjaGVuXG5yZW1vdmUobGlzdCA9IGxzKCkpXG5cbiMgRWluYmluZGVuIGJlbsO2dGlndGVyIEZ1bmt0aW9uc2JpYmxpb3RoZWtlblxubGlicmFyeShyZWFkcilcbmxpYnJhcnkoZmFzdER1bW1pZXMpXG5cbmxpYnJhcnkoZHBseXIpXG5gYGAifQ== -->
+<pre class="r"><code># Falls nicht installiert ggf. folgendes Paket ausführen
+#install.packages(&quot;fastDummies&quot;)
+
+# Umgebungsvariablen löschen
+remove(list = ls())
+
+# Einbinden benötigter Funktionsbibliotheken
+library(readr)
+library(fastDummies)
+
+library(dplyr)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiUmVnaXN0ZXJlZCBTMyBtZXRob2Qgb3ZlcndyaXR0ZW4gYnkgJ2RwbHlyJzpcbiAgbWV0aG9kICAgICAgICAgICBmcm9tXG4gIHByaW50LnJvd3dpc2VfZGYgICAgIFxuXG5BdHRhY2hlIFBha2V0OiDigJhkcGx5cuKAmVxuXG5UaGUgZm9sbG93aW5nIG9iamVjdHMgYXJlIG1hc2tlZCBmcm9tIOKAmHBhY2thZ2U6c3RhdHPigJk6XG5cbiAgICBmaWx0ZXIsIGxhZ1xuXG5UaGUgZm9sbG93aW5nIG9iamVjdHMgYXJlIG1hc2tlZCBmcm9tIOKAmHBhY2thZ2U6YmFzZeKAmTpcblxuICAgIGludGVyc2VjdCwgc2V0ZGlmZiwgc2V0ZXF1YWwsIHVuaW9uXG4ifQ== -->
+<pre><code>Registered S3 method overwritten by &#39;dplyr&#39;:
+  method           from
+  print.rowwise_df     
+
+Attache Paket: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
 <div id="section-1" class="section level51">
-<p></p>
+<p class="heading"></p>
+</div>
 </div>
 <div id="funktionsdefinitionen" class="section level3">
 <h3>Funktionsdefinitionen</h3>
-<p>#’ Title Fast creation of normalized variables #’ Quickly create normalized columns from numeric type columns in the input data. This function is useful for statistical analysis when you want normalized columns rather than the actual columns. #’ #’ <span class="citation">@param</span> .data An object with the data set you want to make normalized columns from. #’ <span class="citation">@param</span> norm_values Dataframe of column names, means, and standard deviations that is used to create corresponding normalized variables from. #’ #’ <span class="citation">@return</span> A data.frame (or tibble or data.table, depending on input data type) with same number of rows an dcolumns as the inputted data, only with normalized columns for the variables indicated in the norm_values argument. #’ <span class="citation">@export</span> #’ #’ <span class="citation">@examples</span> norm_cols &lt;- function (.data, norm_values = NULL) { for (i in 1:nrow(norm_values) ) { .data[[norm_values$name[i]]] &lt;- (.data[[norm_values$name[i]]] - norm_values<span class="math inline">\(mean[i]) / norm_values\)</span>sd[i] } return (.data) }</p>
-<p>#’ Title Creation of a Dataframe including the Information to Standardize Variables #’ This function is meant to be used in combination with the function norm_cols #’ #’ <span class="citation">@param</span> .data A data set including the variables you want to get the means and standard deviations from. #’ <span class="citation">@param</span> select_columns A vector with a list of variable names for which you want to get the means and standard deviations from. #’ #’ <span class="citation">@return</span> A data.frame (or tibble or data.table, depending on input data type) including the names, means, and standard deviations of the variables included in the select_columns argument. #’ <span class="citation">@export</span> #’ #’ <span class="citation">@examples</span> get.norm_values &lt;- function (.data, select_columns = NULL) { result &lt;- NULL for (col_name in select_columns) { mean &lt;- mean(.data[[col_name]], na.rm = TRUE) sd &lt;- sd(.data[[col_name]], na.rm = TRUE) result &lt;- rbind (result, c(mean, sd)) } result &lt;- as.data.frame(result, stringsAsFactors = FALSE) result &lt;- data.frame (select_columns, result, stringsAsFactors = FALSE) names(result) &lt;- c(“name”, “mean”, “sd”) return (result) }</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIycgVGl0bGUgRmFzdCBjcmVhdGlvbiBvZiBub3JtYWxpemVkIHZhcmlhYmxlc1xuIycgUXVpY2tseSBjcmVhdGUgbm9ybWFsaXplZCBjb2x1bW5zIGZyb20gbnVtZXJpYyB0eXBlIGNvbHVtbnMgaW4gdGhlIGlucHV0IGRhdGEuIFRoaXMgZnVuY3Rpb24gaXMgdXNlZnVsIGZvciBzdGF0aXN0aWNhbCBhbmFseXNpcyB3aGVuIHlvdSB3YW50IG5vcm1hbGl6ZWQgY29sdW1ucyByYXRoZXIgdGhhbiB0aGUgYWN0dWFsIGNvbHVtbnMuXG4jJ1xuIycgQHBhcmFtIC5kYXRhIEFuIG9iamVjdCB3aXRoIHRoZSBkYXRhIHNldCB5b3Ugd2FudCB0byBtYWtlIG5vcm1hbGl6ZWQgY29sdW1ucyBmcm9tLlxuIycgQHBhcmFtIG5vcm1fdmFsdWVzIERhdGFmcmFtZSBvZiBjb2x1bW4gbmFtZXMsIG1lYW5zLCBhbmQgc3RhbmRhcmQgZGV2aWF0aW9ucyB0aGF0IGlzIHVzZWQgdG8gY3JlYXRlIGNvcnJlc3BvbmRpbmcgbm9ybWFsaXplZCB2YXJpYWJsZXMgZnJvbS5cbiMnXG4jJyBAcmV0dXJuIEEgZGF0YS5mcmFtZSAob3IgdGliYmxlIG9yIGRhdGEudGFibGUsIGRlcGVuZGluZyBvbiBpbnB1dCBkYXRhIHR5cGUpIHdpdGggc2FtZSBudW1iZXIgb2Ygcm93cyBhbiBkY29sdW1ucyBhcyB0aGUgaW5wdXR0ZWQgZGF0YSwgb25seSB3aXRoIG5vcm1hbGl6ZWQgY29sdW1ucyBmb3IgdGhlIHZhcmlhYmxlcyBpbmRpY2F0ZWQgaW4gdGhlIG5vcm1fdmFsdWVzIGFyZ3VtZW50LlxuIycgQGV4cG9ydFxuIydcbiMnIEBleGFtcGxlc1xubm9ybV9jb2xzIDwtIGZ1bmN0aW9uICguZGF0YSwgbm9ybV92YWx1ZXMgPSBOVUxMKSB7XG4gIGZvciAoaSBpbiAxOm5yb3cobm9ybV92YWx1ZXMpICApIHtcbiAgICAuZGF0YVtbbm9ybV92YWx1ZXMkbmFtZVtpXV1dIDwtICguZGF0YVtbbm9ybV92YWx1ZXMkbmFtZVtpXV1dIC0gbm9ybV92YWx1ZXMkbWVhbltpXSkgLyBub3JtX3ZhbHVlcyRzZFtpXVxuICB9XG4gIHJldHVybiAoLmRhdGEpXG59XG5cblxuIycgVGl0bGUgQ3JlYXRpb24gb2YgYSBEYXRhZnJhbWUgaW5jbHVkaW5nIHRoZSBJbmZvcm1hdGlvbiB0byBTdGFuZGFyZGl6ZSBWYXJpYWJsZXNcbiMnIFRoaXMgZnVuY3Rpb24gaXMgbWVhbnQgdG8gYmUgdXNlZCBpbiBjb21iaW5hdGlvbiB3aXRoIHRoZSBmdW5jdGlvbiBub3JtX2NvbHNcbiMnXG4jJyBAcGFyYW0gLmRhdGEgQSBkYXRhIHNldCBpbmNsdWRpbmcgdGhlIHZhcmlhYmxlcyB5b3Ugd2FudCB0byBnZXQgdGhlIG1lYW5zIGFuZCBzdGFuZGFyZCBkZXZpYXRpb25zIGZyb20uXG4jJyBAcGFyYW0gc2VsZWN0X2NvbHVtbnMgQSB2ZWN0b3Igd2l0aCBhIGxpc3Qgb2YgdmFyaWFibGUgbmFtZXMgZm9yIHdoaWNoIHlvdSB3YW50IHRvIGdldCB0aGUgbWVhbnMgYW5kIHN0YW5kYXJkIGRldmlhdGlvbnMgZnJvbS5cbiMnXG4jJyBAcmV0dXJuIEEgZGF0YS5mcmFtZSAob3IgdGliYmxlIG9yIGRhdGEudGFibGUsIGRlcGVuZGluZyBvbiBpbnB1dCBkYXRhIHR5cGUpIGluY2x1ZGluZyB0aGUgbmFtZXMsIG1lYW5zLCBhbmQgc3RhbmRhcmQgZGV2aWF0aW9ucyBvZiB0aGUgdmFyaWFibGVzIGluY2x1ZGVkIGluIHRoZSBzZWxlY3RfY29sdW1ucyBhcmd1bWVudC5cbiMnIEBleHBvcnRcbiMnXG4jJyBAZXhhbXBsZXNcbmdldC5ub3JtX3ZhbHVlcyA8LSBmdW5jdGlvbiAoLmRhdGEsIHNlbGVjdF9jb2x1bW5zID0gTlVMTCkge1xuICByZXN1bHQgPC0gTlVMTFxuICBmb3IgKGNvbF9uYW1lIGluIHNlbGVjdF9jb2x1bW5zKSB7XG4gICAgbWVhbiA8LSBtZWFuKC5kYXRhW1tjb2xfbmFtZV1dLCBuYS5ybSA9IFRSVUUpXG4gICAgc2QgPC0gc2QoLmRhdGFbW2NvbF9uYW1lXV0sIG5hLnJtID0gVFJVRSlcbiAgICByZXN1bHQgPC0gcmJpbmQgKHJlc3VsdCwgYyhtZWFuLCBzZCkpXG4gIH1cbiAgcmVzdWx0IDwtIGFzLmRhdGEuZnJhbWUocmVzdWx0LCBzdHJpbmdzQXNGYWN0b3JzID0gRkFMU0UpXG4gIHJlc3VsdCA8LSBkYXRhLmZyYW1lIChzZWxlY3RfY29sdW1ucywgcmVzdWx0LCBzdHJpbmdzQXNGYWN0b3JzID0gRkFMU0UpXG4gIG5hbWVzKHJlc3VsdCkgPC0gYyhcIm5hbWVcIiwgXCJtZWFuXCIsIFwic2RcIilcbiAgcmV0dXJuIChyZXN1bHQpXG59XG5gYGAifQ== -->
+<pre class="r"><code>#&#39; Title Fast creation of normalized variables
+#&#39; Quickly create normalized columns from numeric type columns in the input data. This function is useful for statistical analysis when you want normalized columns rather than the actual columns.
+#&#39;
+#&#39; @param .data An object with the data set you want to make normalized columns from.
+#&#39; @param norm_values Dataframe of column names, means, and standard deviations that is used to create corresponding normalized variables from.
+#&#39;
+#&#39; @return A data.frame (or tibble or data.table, depending on input data type) with same number of rows an dcolumns as the inputted data, only with normalized columns for the variables indicated in the norm_values argument.
+#&#39; @export
+#&#39;
+#&#39; @examples
+norm_cols &lt;- function (.data, norm_values = NULL) {
+  for (i in 1:nrow(norm_values)  ) {
+    .data[[norm_values$name[i]]] &lt;- (.data[[norm_values$name[i]]] - norm_values$mean[i]) / norm_values$sd[i]
+  }
+  return (.data)
+}
+
+
+#&#39; Title Creation of a Dataframe including the Information to Standardize Variables
+#&#39; This function is meant to be used in combination with the function norm_cols
+#&#39;
+#&#39; @param .data A data set including the variables you want to get the means and standard deviations from.
+#&#39; @param select_columns A vector with a list of variable names for which you want to get the means and standard deviations from.
+#&#39;
+#&#39; @return A data.frame (or tibble or data.table, depending on input data type) including the names, means, and standard deviations of the variables included in the select_columns argument.
+#&#39; @export
+#&#39;
+#&#39; @examples
+get.norm_values &lt;- function (.data, select_columns = NULL) {
+  result &lt;- NULL
+  for (col_name in select_columns) {
+    mean &lt;- mean(.data[[col_name]], na.rm = TRUE)
+    sd &lt;- sd(.data[[col_name]], na.rm = TRUE)
+    result &lt;- rbind (result, c(mean, sd))
+  }
+  result &lt;- as.data.frame(result, stringsAsFactors = FALSE)
+  result &lt;- data.frame (select_columns, result, stringsAsFactors = FALSE)
+  names(result) &lt;- c(&quot;name&quot;, &quot;mean&quot;, &quot;sd&quot;)
+  return (result)
+}</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
 <div id="section-2" class="section level51">
-<p></p>
+<p class="heading"></p>
 </div>
 </div>
 <div id="datenimport" class="section level3">
 <h3>Datenimport</h3>
-</div>
-</div>
-<div id="einlesen-der-daten" class="section level1">
-<h1>Einlesen der Daten</h1>
-<p>#house_pricing &lt;- read_csv(“<a href="https://raw.githubusercontent.com/opencampus-sh/sose20-datascience/master/house_pricing_test.csv" class="uri">https://raw.githubusercontent.com/opencampus-sh/sose20-datascience/master/house_pricing_test.csv</a>”) umsatzdaten &lt;- read_csv(“umsatzdaten_gekuerzt.csv”) wetter &lt;- read_csv(“wetter.csv”) feiertage &lt;- read.csv(“feiertage.csv”, sep= “;”) # Splittet durch ‘;’ getrennte Daten in eigene Spalten kiwo &lt;- read.csv(“kiwo.csv”)</p>
-<p>kiwo<span class="math inline">\(Datum &lt;- as.Date(kiwo\)</span>Datum) # Kovertiert die Spalte ‘Datum’ in das ‘Date’-Format</p>
-<p>numsatz &lt;- left_join(umsatzdaten,wetter) numsatz<span class="math inline">\(Wochentag &lt;- weekdays(as.Date(numsatz\)</span>Datum)) numsatz &lt;- left_join(numsatz, unique(kiwo)) #Durch unique werden Extraspalten wie ‘Datum.x’ verhindert</p>
-<p>feiertage<span class="math inline">\(Datum &lt;- as.Date(feiertage\)</span>Datum) # Kovertierte die Spalte ‘Datum’ in das ‘Date’-Format</p>
-<p>feiertage$Feiertag &lt;- 1 #alle Feiertage mit 1 codiert</p>
-<p>numsatz &lt;- left_join(numsatz, unique(feiertage)) # unique verhindert Extraspalten wie ‘Datum.y’ numsatz &lt;- left_join(numsatz, kiwo)</p>
-<p>numsatz<span class="math inline">\(KielerWoche[is.na(numsatz\)</span>KielerWoche)] &lt;-0 #NA zu O numsatz<span class="math inline">\(Feiertag[is.na(numsatz\)</span>Feiertag)] &lt;- 0 #NA zu 0 numsatz<span class="math inline">\(Heiligerabend_dummy[is.na(numsatz\)</span>Heiligerabend_dummy)] &lt;- 0 numsatz<span class="math inline">\(Silvester_dummy[is.na(numsatz\)</span>Silvester_dummy)] &lt;- 0 numsatz<span class="math inline">\(Wettercode[is.na(numsatz\)</span>Wettercode)] &lt;- 0 #NA zu 0</p>
-<p>View(numsatz)</p>
-<div id="section-3" class="section level51">
-<p></p>
-</div>
-<div id="datenaufbereitung" class="section level3">
-<h3>Datenaufbereitung</h3>
-</div>
-</div>
-<div id="rekodierung-von-kategoriellen-variablen-zu-dummy-variablen" class="section level1">
-<h1>Rekodierung von kategoriellen Variablen (zu Dummy-Variablen)</h1>
-<p>#dummy_list &lt;- c(“view”, “condition”) #house_pricing_dummy = dummy_cols(house_pricing, dummy_list) dummy_list &lt;- c(“Warengruppe”, “Wochentag”) numsatz_dummy = dummy_cols(numsatz, dummy_list)</p>
-</div>
-<div id="definition-von-variablenlisten-für-die-dummies-um-das-arbeiten-mit-diesen-zu-erleichtern" class="section level1">
-<h1>Definition von Variablenlisten für die Dummies, um das Arbeiten mit diesen zu erleichtern</h1>
-<p>#condition_dummies = c(‘condition_1’, ‘condition_2’, ‘condition_3’, ‘condition_4’, ‘condition_5’) #view_dummies = c(‘view_0’, ‘view_1’, ‘view_2’, ‘view_3’,‘view_4’)</p>
-<p>Warengruppe_dummies = c(‘Warengruppe_1’, ‘Warengruppe_2’, ‘Warengruppe_3’, ‘Warengruppe_4’, ‘Warengruppe_5’, ‘Warengruppe_6’) #Wochentag_dummies = c(‘Wochentag_1’, ‘Wochentag_2’, ‘Wochentag_3’, ‘Wochentag_4’, ‘Wochentag_5’, ‘WWochentag_6’, ‘WWochentag_7’) Wochentag_dummies = c(‘Wochentag_Monday’, ‘Wochentag_Tuesday’, ‘Wochentag_Wednesday’, ‘Wochentag_Thursday’, ‘Wochentag_Friday’, ‘Wochentag_Saturday’, ‘Wochentag_Sunday’)</p>
-</div>
-<div id="standardisierung-aller-feature-variablen-und-der-label-variable" class="section level1">
-<h1>Standardisierung aller Feature Variablen und der Label Variable</h1>
-<p>#norm_list &lt;- c(“price”, “sqft_lot”, “bathrooms”, “grade”, “waterfront”, view_dummies, condition_dummies) # Liste aller Variablen #norm_values_list &lt;- get.norm_values(house_pricing_dummy, norm_list) # Berechnung der Mittelwerte und Std.-Abw. der Variablen #house_pricing_norm &lt;- norm_cols(house_pricing_dummy, norm_values_list) # Standardisierung der Variablen</p>
-<p>norm_list &lt;- c(“Umsatz”, “Temperatur”, Warengruppe_dummies, Wochentag_dummies) # Liste aller Variablen norm_values_list &lt;- get.norm_values(numsatz_dummy, norm_list)<br />
-# Berechnung der Mittelwerte und Std.-Abw. der Variablen numsatz_norm &lt;- norm_cols(numsatz_dummy, norm_values_list) # Standardisierung der Variablen</p>
-<div id="section-4" class="section level51">
-<p></p>
-</div>
-<div id="definition-der-feature-variablen-und-der-label-variable" class="section level3">
-<h3>Definition der Feature-Variablen und der Label-Variable</h3>
-</div>
-</div>
-<div id="definition-der-features-der-unabhängigen-variablen-auf-deren-basis-die-vorhersagen-erzeugt-werden-sollen" class="section level1">
-<h1>Definition der Features (der unabhängigen Variablen auf deren Basis die Vorhersagen erzeugt werden sollen)</h1>
-<p>features = c(‘Temperatur’, Warengruppe_dummies, Wochentag_dummies) # Definition der Label-Variable (der abhaengigen Variable, die vorhergesagt werden soll) sowie label = ‘Umsatz’</p>
-<div id="section-5" class="section level51">
-<p></p>
-</div>
-<div id="definition-von-trainings--und-testdatensatz" class="section level3">
-<h3>Definition von Trainings- und Testdatensatz</h3>
-</div>
-</div>
-<div id="zufallszähler-setzen-um-die-zufällige-partitionierung-bei-jedem-durchlauf-gleich-zu-halten" class="section level1">
-<h1>Zufallszähler setzen, um die zufällige Partitionierung bei jedem Durchlauf gleich zu halten</h1>
-<p>set.seed(1) # Bestimmung der Indizes des Traininsdatensatzes train_ind &lt;- sample(seq_len(nrow(numsatz_norm)), size = floor(0.66 * nrow(numsatz_norm)))</p>
-</div>
-<div id="teilen-in-trainings--und-testdatensatz" class="section level1">
-<h1>Teilen in Trainings- und Testdatensatz</h1>
-<p>train_dataset = numsatz_norm[train_ind, features] test_dataset = numsatz_norm[-train_ind, features]</p>
-</div>
-<div id="selektion-der-variable-die-als-label-definiert-wurde" class="section level1">
-<h1>Selektion der Variable, die als Label definiert wurde</h1>
-<p>train_labels = numsatz_norm[train_ind, label] test_labels = numsatz_norm[-train_ind, label]</p>
-<p>This is an <a href="http://rmarkdown.rstudio.com">R Markdown</a> Notebook. When you execute code within the notebook, the results appear beneath the code.</p>
-<p>Try executing this chunk by clicking the <em>Run</em> button within the chunk or by placing your cursor inside it and pressing <em>Cmd+Shift+Enter</em>.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucGxvdChjYXJzKVxuYGBgIn0= -->
-<pre class="r"><code>plot(cars)</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBFaW5sZXNlbiBkZXIgRGF0ZW5cbiNob3VzZV9wcmljaW5nIDwtIHJlYWRfY3N2KFwiaHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL29wZW5jYW1wdXMtc2gvc29zZTIwLWRhdGFzY2llbmNlL21hc3Rlci9ob3VzZV9wcmljaW5nX3Rlc3QuY3N2XCIpXG51bXNhdHpkYXRlbiA8LSByZWFkX2NzdihcInVtc2F0emRhdGVuX2dla3Vlcnp0LmNzdlwiKVxuYGBgIn0= -->
+<pre class="r"><code># Einlesen der Daten
+#house_pricing &lt;- read_csv(&quot;https://raw.githubusercontent.com/opencampus-sh/sose20-datascience/master/house_pricing_test.csv&quot;)
+umsatzdaten &lt;- read_csv(&quot;umsatzdaten_gekuerzt.csv&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiUGFyc2VkIHdpdGggY29sdW1uIHNwZWNpZmljYXRpb246XG5jb2xzKFxuICBEYXR1bSA9IGNvbF9kYXRlKGZvcm1hdCA9IFwiXCIpLFxuICBXYXJlbmdydXBwZSA9IGNvbF9kb3VibGUoKSxcbiAgVW1zYXR6ID0gY29sX2RvdWJsZSgpXG4pXG4ifQ== -->
+<pre><code>Parsed with column specification:
+cols(
+  Datum = col_date(format = &quot;&quot;),
+  Warengruppe = col_double(),
+  Umsatz = col_double()
+)</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxud2V0dGVyIDwtIHJlYWRfY3N2KFwid2V0dGVyLmNzdlwiKVxuYGBgIn0= -->
+<pre class="r"><code>wetter &lt;- read_csv(&quot;wetter.csv&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiUGFyc2VkIHdpdGggY29sdW1uIHNwZWNpZmljYXRpb246XG5jb2xzKFxuICBEYXR1bSA9IGNvbF9kYXRlKGZvcm1hdCA9IFwiXCIpLFxuICBCZXdvZWxrdW5nID0gY29sX2RvdWJsZSgpLFxuICBUZW1wZXJhdHVyID0gY29sX2RvdWJsZSgpLFxuICBXaW5kZ2VzY2h3aW5kaWdrZWl0ID0gY29sX2RvdWJsZSgpLFxuICBXZXR0ZXJjb2RlID0gY29sX2RvdWJsZSgpXG4pXG4ifQ== -->
+<pre><code>Parsed with column specification:
+cols(
+  Datum = col_date(format = &quot;&quot;),
+  Bewoelkung = col_double(),
+  Temperatur = col_double(),
+  Windgeschwindigkeit = col_double(),
+  Wettercode = col_double()
+)</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZmVpZXJ0YWdlIDwtIHJlYWQuY3N2KFwiZmVpZXJ0YWdlLmNzdlwiLCBzZXA9IFwiO1wiKVxuIyBTcGxpdHRldCBkdXJjaCAnOycgZ2V0cmVubnRlIERhdGVuIGluIGVpZ2VuZSBTcGFsdGVuXG5raXdvIDwtIHJlYWQuY3N2KFwia2l3by5jc3ZcIilcblxuXG5raXdvJERhdHVtIDwtIGFzLkRhdGUoa2l3byREYXR1bSlcbiMgS292ZXJ0aWVydCBkaWUgU3BhbHRlICdEYXR1bScgaW4gZGFzICdEYXRlJy1Gb3JtYXRcblxubnVtc2F0eiA8LSBsZWZ0X2pvaW4odW1zYXR6ZGF0ZW4sd2V0dGVyKVxuYGBgIn0= -->
+<pre class="r"><code>feiertage &lt;- read.csv(&quot;feiertage.csv&quot;, sep= &quot;;&quot;)
+# Splittet durch &#39;;&#39; getrennte Daten in eigene Spalten
+kiwo &lt;- read.csv(&quot;kiwo.csv&quot;)
+
+
+kiwo$Datum &lt;- as.Date(kiwo$Datum)
+# Kovertiert die Spalte &#39;Datum&#39; in das &#39;Date&#39;-Format
+
+numsatz &lt;- left_join(umsatzdaten,wetter)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiSm9pbmluZywgYnkgPSBcIkRhdHVtXCJcbiJ9 -->
+<pre><code>Joining, by = &quot;Datum&quot;</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubnVtc2F0eiRXb2NoZW50YWcgPC0gd2Vla2RheXMoYXMuRGF0ZShudW1zYXR6JERhdHVtKSlcbm51bXNhdHogPC0gbGVmdF9qb2luKG51bXNhdHosIHVuaXF1ZShraXdvKSkgXG5gYGAifQ== -->
+<pre class="r"><code>numsatz$Wochentag &lt;- weekdays(as.Date(numsatz$Datum))
+numsatz &lt;- left_join(numsatz, unique(kiwo)) </code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiSm9pbmluZywgYnkgPSBcIkRhdHVtXCJcbiJ9 -->
+<pre><code>Joining, by = &quot;Datum&quot;</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuI0R1cmNoIHVuaXF1ZSB3ZXJkZW4gRXh0cmFzcGFsdGVuIHdpZSAnRGF0dW0ueCcgdmVyaGluZGVydFxuXG5cbmZlaWVydGFnZSREYXR1bSA8LSBhcy5EYXRlKGZlaWVydGFnZSREYXR1bSkgXG4jIEtvdmVydGllcnRlIGRpZSBTcGFsdGUgJ0RhdHVtJyBpbiBkYXMgJ0RhdGUnLUZvcm1hdFxuXG5mZWllcnRhZ2UkRmVpZXJ0YWcgPC0gMSAjYWxsZSBGZWllcnRhZ2UgbWl0IDEgY29kaWVydFxuXG5cbm51bXNhdHogPC0gbGVmdF9qb2luKG51bXNhdHosIHVuaXF1ZShmZWllcnRhZ2UpKSBcbmBgYCJ9 -->
+<pre class="r"><code>#Durch unique werden Extraspalten wie &#39;Datum.x&#39; verhindert
+
+
+feiertage$Datum &lt;- as.Date(feiertage$Datum) 
+# Kovertierte die Spalte &#39;Datum&#39; in das &#39;Date&#39;-Format
+
+feiertage$Feiertag &lt;- 1 #alle Feiertage mit 1 codiert
+
+
+numsatz &lt;- left_join(numsatz, unique(feiertage)) </code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiSm9pbmluZywgYnkgPSBcIkRhdHVtXCJcbiJ9 -->
+<pre><code>Joining, by = &quot;Datum&quot;</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyB1bmlxdWUgdmVyaGluZGVydCBFeHRyYXNwYWx0ZW4gd2llICdEYXR1bS55J1xubnVtc2F0eiA8LSBsZWZ0X2pvaW4obnVtc2F0eiwga2l3bylcbmBgYCJ9 -->
+<pre class="r"><code># unique verhindert Extraspalten wie &#39;Datum.y&#39;
+numsatz &lt;- left_join(numsatz, kiwo)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiSm9pbmluZywgYnkgPSBjKFwiRGF0dW1cIiwgXCJLaWVsZXJXb2NoZVwiKVxuIn0= -->
+<pre><code>Joining, by = c(&quot;Datum&quot;, &quot;KielerWoche&quot;)</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubnVtc2F0eiRLaWVsZXJXb2NoZVtpcy5uYShudW1zYXR6JEtpZWxlcldvY2hlKV0gPC0wIFxuI05BIHp1IE9cbm51bXNhdHokRmVpZXJ0YWdbaXMubmEobnVtc2F0eiRGZWllcnRhZyldIDwtIDAgXG4jTkEgenUgMFxubnVtc2F0eiRIZWlsaWdlcmFiZW5kX2R1bW15W2lzLm5hKG51bXNhdHokSGVpbGlnZXJhYmVuZF9kdW1teSldIDwtIDBcbm51bXNhdHokU2lsdmVzdGVyX2R1bW15W2lzLm5hKG51bXNhdHokU2lsdmVzdGVyX2R1bW15KV0gPC0gMFxubnVtc2F0eiRXZXR0ZXJjb2RlW2lzLm5hKG51bXNhdHokV2V0dGVyY29kZSldIDwtIDAgXG4jTkEgenUgMFxuXG5WaWV3KG51bXNhdHopXG5gYGAifQ== -->
+<pre class="r"><code>numsatz$KielerWoche[is.na(numsatz$KielerWoche)] &lt;-0 
+#NA zu O
+numsatz$Feiertag[is.na(numsatz$Feiertag)] &lt;- 0 
+#NA zu 0
+numsatz$Heiligerabend_dummy[is.na(numsatz$Heiligerabend_dummy)] &lt;- 0
+numsatz$Silvester_dummy[is.na(numsatz$Silvester_dummy)] &lt;- 0
+numsatz$Wettercode[is.na(numsatz$Wettercode)] &lt;- 0 
+#NA zu 0
+
+View(numsatz)</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
-<p>Add a new chunk by clicking the <em>Insert Chunk</em> button on the toolbar or by pressing <em>Cmd+Option+I</em>.</p>
-<p>When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the <em>Preview</em> button or press <em>Cmd+Shift+K</em> to preview the HTML file).</p>
-<p>The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike <em>Knit</em>, <em>Preview</em> does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.</p>
+<div id="section-3" class="section level51">
+<p class="heading"></p>
+</div>
+</div>
+<div id="datenaufbereitung" class="section level3">
+<h3>Datenaufbereitung</h3>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBSZWtvZGllcnVuZyB2b24ga2F0ZWdvcmllbGxlbiBWYXJpYWJsZW4gKHp1IER1bW15LVZhcmlhYmxlbilcbiNkdW1teV9saXN0IDwtIGMoXCJ2aWV3XCIsIFwiY29uZGl0aW9uXCIpXG4jaG91c2VfcHJpY2luZ19kdW1teSA9IGR1bW15X2NvbHMoaG91c2VfcHJpY2luZywgZHVtbXlfbGlzdClcbmR1bW15X2xpc3QgPC0gYyhcIldhcmVuZ3J1cHBlXCIsIFwiV29jaGVudGFnXCIpXG5udW1zYXR6X2R1bW15ID0gZHVtbXlfY29scyhudW1zYXR6LCBkdW1teV9saXN0KVxuXG4jIERlZmluaXRpb24gdm9uIFZhcmlhYmxlbmxpc3RlbiBmw7xyIGRpZSBEdW1taWVzLCB1bSBkYXMgQXJiZWl0ZW4gbWl0IGRpZXNlbiB6dSBlcmxlaWNodGVyblxuI2NvbmRpdGlvbl9kdW1taWVzID0gYygnY29uZGl0aW9uXzEnLCAnY29uZGl0aW9uXzInLCAnY29uZGl0aW9uXzMnLCAnY29uZGl0aW9uXzQnLCAnY29uZGl0aW9uXzUnKVxuI3ZpZXdfZHVtbWllcyA9IGMoJ3ZpZXdfMCcsICd2aWV3XzEnLCAndmlld18yJywgJ3ZpZXdfMycsJ3ZpZXdfNCcpXG5cbldhcmVuZ3J1cHBlX2R1bW1pZXMgPSBjKCdXYXJlbmdydXBwZV8xJywgJ1dhcmVuZ3J1cHBlXzInLCAnV2FyZW5ncnVwcGVfMycsICdXYXJlbmdydXBwZV80JywgJ1dhcmVuZ3J1cHBlXzUnLCAnV2FyZW5ncnVwcGVfNicpXG4jV29jaGVudGFnX2R1bW1pZXMgPSBjKCdXb2NoZW50YWdfMScsICdXb2NoZW50YWdfMicsICdXb2NoZW50YWdfMycsICdXb2NoZW50YWdfNCcsICdXb2NoZW50YWdfNScsICdXV29jaGVudGFnXzYnLCAnV1dvY2hlbnRhZ183JylcbldvY2hlbnRhZ19kdW1taWVzID0gYygnV29jaGVudGFnX01vbnRhZycsICdXb2NoZW50YWdfRGllbnN0YWcnLCAnV29jaGVudGFnX01pdHR3b2NoJywgJ1dvY2hlbnRhZ19Eb25uZXJzdGFnJywgJ1dvY2hlbnRhZ19GcmVpdGFnJywgJ1dvY2hlbnRhZ19TYW1zdGFnJywgJ1dvY2hlbnRhZ19Tb25udGFnJylcblxuYGBgIn0= -->
+<pre class="r"><code># Rekodierung von kategoriellen Variablen (zu Dummy-Variablen)
+#dummy_list &lt;- c(&quot;view&quot;, &quot;condition&quot;)
+#house_pricing_dummy = dummy_cols(house_pricing, dummy_list)
+dummy_list &lt;- c(&quot;Warengruppe&quot;, &quot;Wochentag&quot;)
+numsatz_dummy = dummy_cols(numsatz, dummy_list)
+
+# Definition von Variablenlisten für die Dummies, um das Arbeiten mit diesen zu erleichtern
+#condition_dummies = c(&#39;condition_1&#39;, &#39;condition_2&#39;, &#39;condition_3&#39;, &#39;condition_4&#39;, &#39;condition_5&#39;)
+#view_dummies = c(&#39;view_0&#39;, &#39;view_1&#39;, &#39;view_2&#39;, &#39;view_3&#39;,&#39;view_4&#39;)
+
+Warengruppe_dummies = c(&#39;Warengruppe_1&#39;, &#39;Warengruppe_2&#39;, &#39;Warengruppe_3&#39;, &#39;Warengruppe_4&#39;, &#39;Warengruppe_5&#39;, &#39;Warengruppe_6&#39;)
+#Wochentag_dummies = c(&#39;Wochentag_1&#39;, &#39;Wochentag_2&#39;, &#39;Wochentag_3&#39;, &#39;Wochentag_4&#39;, &#39;Wochentag_5&#39;, &#39;WWochentag_6&#39;, &#39;WWochentag_7&#39;)
+Wochentag_dummies = c(&#39;Wochentag_Montag&#39;, &#39;Wochentag_Dienstag&#39;, &#39;Wochentag_Mittwoch&#39;, &#39;Wochentag_Donnerstag&#39;, &#39;Wochentag_Freitag&#39;, &#39;Wochentag_Samstag&#39;, &#39;Wochentag_Sonntag&#39;)
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBTdGFuZGFyZGlzaWVydW5nIGFsbGVyIEZlYXR1cmUgVmFyaWFibGVuIHVuZCBkZXIgTGFiZWwgVmFyaWFibGVcbiNub3JtX2xpc3QgPC0gYyhcInByaWNlXCIsIFwic3FmdF9sb3RcIiwgXCJiYXRocm9vbXNcIiwgXCJncmFkZVwiLCBcIndhdGVyZnJvbnRcIiwgdmlld19kdW1taWVzLCBjb25kaXRpb25fZHVtbWllcykgIyBMaXN0ZSBhbGxlciBWYXJpYWJsZW5cbiNub3JtX3ZhbHVlc19saXN0IDwtIGdldC5ub3JtX3ZhbHVlcyhob3VzZV9wcmljaW5nX2R1bW15LCBub3JtX2xpc3QpICAgICMgQmVyZWNobnVuZyBkZXIgTWl0dGVsd2VydGUgdW5kIFN0ZC4tQWJ3LiBkZXIgVmFyaWFibGVuXG4jaG91c2VfcHJpY2luZ19ub3JtIDwtIG5vcm1fY29scyhob3VzZV9wcmljaW5nX2R1bW15LCBub3JtX3ZhbHVlc19saXN0KSAjIFN0YW5kYXJkaXNpZXJ1bmcgZGVyIFZhcmlhYmxlblxuXG5cblxuXG5ub3JtX2xpc3QgPC0gYyhcIlVtc2F0elwiLCBcIlRlbXBlcmF0dXJcIiwgV2FyZW5ncnVwcGVfZHVtbWllcywgV29jaGVudGFnX2R1bW1pZXMpXG4jIExpc3RlIGFsbGVyIFZhcmlhYmxlblxubm9ybV92YWx1ZXNfbGlzdCA8LSBnZXQubm9ybV92YWx1ZXMobnVtc2F0el9kdW1teSwgbm9ybV9saXN0KSAgIFxuIyBCZXJlY2hudW5nIGRlciBNaXR0ZWx3ZXJ0ZSB1bmQgU3RkLi1BYncuIGRlciBWYXJpYWJsZW5cbm51bXNhdHpfbm9ybSA8LSBub3JtX2NvbHMobnVtc2F0el9kdW1teSwgbm9ybV92YWx1ZXNfbGlzdCkgXG4jIFN0YW5kYXJkaXNpZXJ1bmcgZGVyIFZhcmlhYmxlblxuYGBgIn0= -->
+<pre class="r"><code># Standardisierung aller Feature Variablen und der Label Variable
+#norm_list &lt;- c(&quot;price&quot;, &quot;sqft_lot&quot;, &quot;bathrooms&quot;, &quot;grade&quot;, &quot;waterfront&quot;, view_dummies, condition_dummies) # Liste aller Variablen
+#norm_values_list &lt;- get.norm_values(house_pricing_dummy, norm_list)    # Berechnung der Mittelwerte und Std.-Abw. der Variablen
+#house_pricing_norm &lt;- norm_cols(house_pricing_dummy, norm_values_list) # Standardisierung der Variablen
+
+
+
+
+norm_list &lt;- c(&quot;Umsatz&quot;, &quot;Temperatur&quot;, Warengruppe_dummies, Wochentag_dummies)
+# Liste aller Variablen
+norm_values_list &lt;- get.norm_values(numsatz_dummy, norm_list)   
+# Berechnung der Mittelwerte und Std.-Abw. der Variablen
+numsatz_norm &lt;- norm_cols(numsatz_dummy, norm_values_list) 
+# Standardisierung der Variablen</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<div id="section-4" class="section level51">
+<p class="heading"></p>
+</div>
+</div>
+<div id="definition-der-feature-variablen-und-der-label-variable" class="section level3">
+<h3>Definition der Feature-Variablen und der Label-Variable</h3>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBEZWZpbml0aW9uIGRlciBGZWF0dXJlcyAoZGVyIHVuYWJow6RuZ2lnZW4gVmFyaWFibGVuIGF1ZiBkZXJlbiBCYXNpcyBkaWUgVm9yaGVyc2FnZW4gZXJ6ZXVndCB3ZXJkZW4gc29sbGVuKVxuZmVhdHVyZXMgPSBjKCdUZW1wZXJhdHVyJywgV2FyZW5ncnVwcGVfZHVtbWllcywgV29jaGVudGFnX2R1bW1pZXMpXG4jIERlZmluaXRpb24gZGVyIExhYmVsLVZhcmlhYmxlIChkZXIgYWJoYWVuZ2lnZW4gVmFyaWFibGUsIGRpZSB2b3JoZXJnZXNhZ3Qgd2VyZGVuIHNvbGwpIHNvd2llXG5sYWJlbCA9ICdVbXNhdHonXG5gYGAifQ== -->
+<pre class="r"><code># Definition der Features (der unabhängigen Variablen auf deren Basis die Vorhersagen erzeugt werden sollen)
+features = c(&#39;Temperatur&#39;, Warengruppe_dummies, Wochentag_dummies)
+# Definition der Label-Variable (der abhaengigen Variable, die vorhergesagt werden soll) sowie
+label = &#39;Umsatz&#39;</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<div id="section-5" class="section level51">
+<p class="heading"></p>
+</div>
+</div>
+<div id="definition-von-trainings--und-testdatensatz" class="section level3">
+<h3>Definition von Trainings- und Testdatensatz</h3>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBadWZhbGxzesOkaGxlciBzZXR6ZW4sIHVtIGRpZSB6dWbDpGxsaWdlIFBhcnRpdGlvbmllcnVuZyBiZWkgamVkZW0gRHVyY2hsYXVmIGdsZWljaCB6dSBoYWx0ZW5cbnNldC5zZWVkKDEpXG4jIEJlc3RpbW11bmcgZGVyIEluZGl6ZXMgZGVzIFRyYWluaW5zZGF0ZW5zYXR6ZXNcbnRyYWluX2luZCA8LSBzYW1wbGUoc2VxX2xlbihucm93KG51bXNhdHpfbm9ybSkpLCBzaXplID0gZmxvb3IoMC42NiAqIG5yb3cobnVtc2F0el9ub3JtKSkpXG5cbiMgVGVpbGVuIGluIFRyYWluaW5ncy0gdW5kIFRlc3RkYXRlbnNhdHpcbnRyYWluX2RhdGFzZXQgPSBudW1zYXR6X25vcm1bdHJhaW5faW5kLCBmZWF0dXJlc11cbnRlc3RfZGF0YXNldCA9IG51bXNhdHpfbm9ybVstdHJhaW5faW5kLCBmZWF0dXJlc11cblxuIyBTZWxla3Rpb24gZGVyIFZhcmlhYmxlLCBkaWUgYWxzIExhYmVsIGRlZmluaWVydCB3dXJkZVxudHJhaW5fbGFiZWxzID0gbnVtc2F0el9ub3JtW3RyYWluX2luZCwgbGFiZWxdXG50ZXN0X2xhYmVscyA9IG51bXNhdHpfbm9ybVstdHJhaW5faW5kLCBsYWJlbF1cbmBgYCJ9 -->
+<pre class="r"><code># Zufallszähler setzen, um die zufällige Partitionierung bei jedem Durchlauf gleich zu halten
+set.seed(1)
+# Bestimmung der Indizes des Traininsdatensatzes
+train_ind &lt;- sample(seq_len(nrow(numsatz_norm)), size = floor(0.66 * nrow(numsatz_norm)))
+
+# Teilen in Trainings- und Testdatensatz
+train_dataset = numsatz_norm[train_ind, features]
+test_dataset = numsatz_norm[-train_ind, features]
+
+# Selektion der Variable, die als Label definiert wurde
+train_labels = numsatz_norm[train_ind, label]
+test_labels = numsatz_norm[-train_ind, label]</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 </div>
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiUiBOb3RlYm9vayIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjCiMjIyBWb3JiZXJlaXR1bmcgZGVyIFVtZ2VidW5nICMjIyMKCiMgRmFsbHMgbmljaHQgaW5zdGFsbGllcnQgZ2dmLiBmb2xnZW5kZXMgUGFrZXQgYXVzZsO8aHJlbgojaW5zdGFsbC5wYWNrYWdlcygiZmFzdER1bW1pZXMiKQoKIyBVbWdlYnVuZ3N2YXJpYWJsZW4gbMO2c2NoZW4KcmVtb3ZlKGxpc3QgPSBscygpKQoKIyBFaW5iaW5kZW4gYmVuw7Z0aWd0ZXIgRnVua3Rpb25zYmlibGlvdGhla2VuCmxpYnJhcnkocmVhZHIpCmxpYnJhcnkoZmFzdER1bW1pZXMpCgpsaWJyYXJ5KGRwbHlyKQoKIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjCiMjIyBGdW5rdGlvbnNkZWZpbml0aW9uZW4gIyMjIwoKIycgVGl0bGUgRmFzdCBjcmVhdGlvbiBvZiBub3JtYWxpemVkIHZhcmlhYmxlcwojJyBRdWlja2x5IGNyZWF0ZSBub3JtYWxpemVkIGNvbHVtbnMgZnJvbSBudW1lcmljIHR5cGUgY29sdW1ucyBpbiB0aGUgaW5wdXQgZGF0YS4gVGhpcyBmdW5jdGlvbiBpcyB1c2VmdWwgZm9yIHN0YXRpc3RpY2FsIGFuYWx5c2lzIHdoZW4geW91IHdhbnQgbm9ybWFsaXplZCBjb2x1bW5zIHJhdGhlciB0aGFuIHRoZSBhY3R1YWwgY29sdW1ucy4KIycKIycgQHBhcmFtIC5kYXRhIEFuIG9iamVjdCB3aXRoIHRoZSBkYXRhIHNldCB5b3Ugd2FudCB0byBtYWtlIG5vcm1hbGl6ZWQgY29sdW1ucyBmcm9tLgojJyBAcGFyYW0gbm9ybV92YWx1ZXMgRGF0YWZyYW1lIG9mIGNvbHVtbiBuYW1lcywgbWVhbnMsIGFuZCBzdGFuZGFyZCBkZXZpYXRpb25zIHRoYXQgaXMgdXNlZCB0byBjcmVhdGUgY29ycmVzcG9uZGluZyBub3JtYWxpemVkIHZhcmlhYmxlcyBmcm9tLgojJwojJyBAcmV0dXJuIEEgZGF0YS5mcmFtZSAob3IgdGliYmxlIG9yIGRhdGEudGFibGUsIGRlcGVuZGluZyBvbiBpbnB1dCBkYXRhIHR5cGUpIHdpdGggc2FtZSBudW1iZXIgb2Ygcm93cyBhbiBkY29sdW1ucyBhcyB0aGUgaW5wdXR0ZWQgZGF0YSwgb25seSB3aXRoIG5vcm1hbGl6ZWQgY29sdW1ucyBmb3IgdGhlIHZhcmlhYmxlcyBpbmRpY2F0ZWQgaW4gdGhlIG5vcm1fdmFsdWVzIGFyZ3VtZW50LgojJyBAZXhwb3J0CiMnCiMnIEBleGFtcGxlcwpub3JtX2NvbHMgPC0gZnVuY3Rpb24gKC5kYXRhLCBub3JtX3ZhbHVlcyA9IE5VTEwpIHsKICBmb3IgKGkgaW4gMTpucm93KG5vcm1fdmFsdWVzKSAgKSB7CiAgICAuZGF0YVtbbm9ybV92YWx1ZXMkbmFtZVtpXV1dIDwtICguZGF0YVtbbm9ybV92YWx1ZXMkbmFtZVtpXV1dIC0gbm9ybV92YWx1ZXMkbWVhbltpXSkgLyBub3JtX3ZhbHVlcyRzZFtpXQogIH0KICByZXR1cm4gKC5kYXRhKQp9CgoKIycgVGl0bGUgQ3JlYXRpb24gb2YgYSBEYXRhZnJhbWUgaW5jbHVkaW5nIHRoZSBJbmZvcm1hdGlvbiB0byBTdGFuZGFyZGl6ZSBWYXJpYWJsZXMKIycgVGhpcyBmdW5jdGlvbiBpcyBtZWFudCB0byBiZSB1c2VkIGluIGNvbWJpbmF0aW9uIHdpdGggdGhlIGZ1bmN0aW9uIG5vcm1fY29scwojJwojJyBAcGFyYW0gLmRhdGEgQSBkYXRhIHNldCBpbmNsdWRpbmcgdGhlIHZhcmlhYmxlcyB5b3Ugd2FudCB0byBnZXQgdGhlIG1lYW5zIGFuZCBzdGFuZGFyZCBkZXZpYXRpb25zIGZyb20uCiMnIEBwYXJhbSBzZWxlY3RfY29sdW1ucyBBIHZlY3RvciB3aXRoIGEgbGlzdCBvZiB2YXJpYWJsZSBuYW1lcyBmb3Igd2hpY2ggeW91IHdhbnQgdG8gZ2V0IHRoZSBtZWFucyBhbmQgc3RhbmRhcmQgZGV2aWF0aW9ucyBmcm9tLgojJwojJyBAcmV0dXJuIEEgZGF0YS5mcmFtZSAob3IgdGliYmxlIG9yIGRhdGEudGFibGUsIGRlcGVuZGluZyBvbiBpbnB1dCBkYXRhIHR5cGUpIGluY2x1ZGluZyB0aGUgbmFtZXMsIG1lYW5zLCBhbmQgc3RhbmRhcmQgZGV2aWF0aW9ucyBvZiB0aGUgdmFyaWFibGVzIGluY2x1ZGVkIGluIHRoZSBzZWxlY3RfY29sdW1ucyBhcmd1bWVudC4KIycgQGV4cG9ydAojJwojJyBAZXhhbXBsZXMKZ2V0Lm5vcm1fdmFsdWVzIDwtIGZ1bmN0aW9uICguZGF0YSwgc2VsZWN0X2NvbHVtbnMgPSBOVUxMKSB7CiAgcmVzdWx0IDwtIE5VTEwKICBmb3IgKGNvbF9uYW1lIGluIHNlbGVjdF9jb2x1bW5zKSB7CiAgICBtZWFuIDwtIG1lYW4oLmRhdGFbW2NvbF9uYW1lXV0sIG5hLnJtID0gVFJVRSkKICAgIHNkIDwtIHNkKC5kYXRhW1tjb2xfbmFtZV1dLCBuYS5ybSA9IFRSVUUpCiAgICByZXN1bHQgPC0gcmJpbmQgKHJlc3VsdCwgYyhtZWFuLCBzZCkpCiAgfQogIHJlc3VsdCA8LSBhcy5kYXRhLmZyYW1lKHJlc3VsdCwgc3RyaW5nc0FzRmFjdG9ycyA9IEZBTFNFKQogIHJlc3VsdCA8LSBkYXRhLmZyYW1lIChzZWxlY3RfY29sdW1ucywgcmVzdWx0LCBzdHJpbmdzQXNGYWN0b3JzID0gRkFMU0UpCiAgbmFtZXMocmVzdWx0KSA8LSBjKCJuYW1lIiwgIm1lYW4iLCAic2QiKQogIHJldHVybiAocmVzdWx0KQp9CgoKCiMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIwojIyMgRGF0ZW5pbXBvcnQgIyMjIwoKIyBFaW5sZXNlbiBkZXIgRGF0ZW4KI2hvdXNlX3ByaWNpbmcgPC0gcmVhZF9jc3YoImh0dHBzOi8vcmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbS9vcGVuY2FtcHVzLXNoL3Nvc2UyMC1kYXRhc2NpZW5jZS9tYXN0ZXIvaG91c2VfcHJpY2luZ190ZXN0LmNzdiIpCnVtc2F0emRhdGVuIDwtIHJlYWRfY3N2KCJ1bXNhdHpkYXRlbl9nZWt1ZXJ6dC5jc3YiKQp3ZXR0ZXIgPC0gcmVhZF9jc3YoIndldHRlci5jc3YiKQpmZWllcnRhZ2UgPC0gcmVhZC5jc3YoImZlaWVydGFnZS5jc3YiLCBzZXA9ICI7IikKIyBTcGxpdHRldCBkdXJjaCAnOycgZ2V0cmVubnRlIERhdGVuIGluIGVpZ2VuZSBTcGFsdGVuCmtpd28gPC0gcmVhZC5jc3YoImtpd28uY3N2IikKCgpraXdvJERhdHVtIDwtIGFzLkRhdGUoa2l3byREYXR1bSkKIyBLb3ZlcnRpZXJ0IGRpZSBTcGFsdGUgJ0RhdHVtJyBpbiBkYXMgJ0RhdGUnLUZvcm1hdAoKbnVtc2F0eiA8LSBsZWZ0X2pvaW4odW1zYXR6ZGF0ZW4sd2V0dGVyKQpudW1zYXR6JFdvY2hlbnRhZyA8LSB3ZWVrZGF5cyhhcy5EYXRlKG51bXNhdHokRGF0dW0pKQpudW1zYXR6IDwtIGxlZnRfam9pbihudW1zYXR6LCB1bmlxdWUoa2l3bykpIAojRHVyY2ggdW5pcXVlIHdlcmRlbiBFeHRyYXNwYWx0ZW4gd2llICdEYXR1bS54JyB2ZXJoaW5kZXJ0CgoKZmVpZXJ0YWdlJERhdHVtIDwtIGFzLkRhdGUoZmVpZXJ0YWdlJERhdHVtKSAKIyBLb3ZlcnRpZXJ0ZSBkaWUgU3BhbHRlICdEYXR1bScgaW4gZGFzICdEYXRlJy1Gb3JtYXQKCmZlaWVydGFnZSRGZWllcnRhZyA8LSAxICNhbGxlIEZlaWVydGFnZSBtaXQgMSBjb2RpZXJ0CgoKbnVtc2F0eiA8LSBsZWZ0X2pvaW4obnVtc2F0eiwgdW5pcXVlKGZlaWVydGFnZSkpIAojIHVuaXF1ZSB2ZXJoaW5kZXJ0IEV4dHJhc3BhbHRlbiB3aWUgJ0RhdHVtLnknCm51bXNhdHogPC0gbGVmdF9qb2luKG51bXNhdHosIGtpd28pCgpudW1zYXR6JEtpZWxlcldvY2hlW2lzLm5hKG51bXNhdHokS2llbGVyV29jaGUpXSA8LTAgCiNOQSB6dSBPCm51bXNhdHokRmVpZXJ0YWdbaXMubmEobnVtc2F0eiRGZWllcnRhZyldIDwtIDAgCiNOQSB6dSAwCm51bXNhdHokSGVpbGlnZXJhYmVuZF9kdW1teVtpcy5uYShudW1zYXR6JEhlaWxpZ2VyYWJlbmRfZHVtbXkpXSA8LSAwCm51bXNhdHokU2lsdmVzdGVyX2R1bW15W2lzLm5hKG51bXNhdHokU2lsdmVzdGVyX2R1bW15KV0gPC0gMApudW1zYXR6JFdldHRlcmNvZGVbaXMubmEobnVtc2F0eiRXZXR0ZXJjb2RlKV0gPC0gMCAKI05BIHp1IDAKClZpZXcobnVtc2F0eikKCiMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIwojIyMgRGF0ZW5hdWZiZXJlaXR1bmcgIyMjIwoKIyBSZWtvZGllcnVuZyB2b24ga2F0ZWdvcmllbGxlbiBWYXJpYWJsZW4gKHp1IER1bW15LVZhcmlhYmxlbikKI2R1bW15X2xpc3QgPC0gYygidmlldyIsICJjb25kaXRpb24iKQojaG91c2VfcHJpY2luZ19kdW1teSA9IGR1bW15X2NvbHMoaG91c2VfcHJpY2luZywgZHVtbXlfbGlzdCkKZHVtbXlfbGlzdCA8LSBjKCJXYXJlbmdydXBwZSIsICJXb2NoZW50YWciKQpudW1zYXR6X2R1bW15ID0gZHVtbXlfY29scyhudW1zYXR6LCBkdW1teV9saXN0KQoKIyBEZWZpbml0aW9uIHZvbiBWYXJpYWJsZW5saXN0ZW4gZsO8ciBkaWUgRHVtbWllcywgdW0gZGFzIEFyYmVpdGVuIG1pdCBkaWVzZW4genUgZXJsZWljaHRlcm4KI2NvbmRpdGlvbl9kdW1taWVzID0gYygnY29uZGl0aW9uXzEnLCAnY29uZGl0aW9uXzInLCAnY29uZGl0aW9uXzMnLCAnY29uZGl0aW9uXzQnLCAnY29uZGl0aW9uXzUnKQojdmlld19kdW1taWVzID0gYygndmlld18wJywgJ3ZpZXdfMScsICd2aWV3XzInLCAndmlld18zJywndmlld180JykKCldhcmVuZ3J1cHBlX2R1bW1pZXMgPSBjKCdXYXJlbmdydXBwZV8xJywgJ1dhcmVuZ3J1cHBlXzInLCAnV2FyZW5ncnVwcGVfMycsICdXYXJlbmdydXBwZV80JywgJ1dhcmVuZ3J1cHBlXzUnLCAnV2FyZW5ncnVwcGVfNicpCiNXb2NoZW50YWdfZHVtbWllcyA9IGMoJ1dvY2hlbnRhZ18xJywgJ1dvY2hlbnRhZ18yJywgJ1dvY2hlbnRhZ18zJywgJ1dvY2hlbnRhZ180JywgJ1dvY2hlbnRhZ181JywgJ1dXb2NoZW50YWdfNicsICdXV29jaGVudGFnXzcnKQpXb2NoZW50YWdfZHVtbWllcyA9IGMoJ1dvY2hlbnRhZ19Nb25kYXknLCAnV29jaGVudGFnX1R1ZXNkYXknLCAnV29jaGVudGFnX1dlZG5lc2RheScsICdXb2NoZW50YWdfVGh1cnNkYXknLCAnV29jaGVudGFnX0ZyaWRheScsICdXb2NoZW50YWdfU2F0dXJkYXknLCAnV29jaGVudGFnX1N1bmRheScpCgoKIyBTdGFuZGFyZGlzaWVydW5nIGFsbGVyIEZlYXR1cmUgVmFyaWFibGVuIHVuZCBkZXIgTGFiZWwgVmFyaWFibGUKI25vcm1fbGlzdCA8LSBjKCJwcmljZSIsICJzcWZ0X2xvdCIsICJiYXRocm9vbXMiLCAiZ3JhZGUiLCAid2F0ZXJmcm9udCIsIHZpZXdfZHVtbWllcywgY29uZGl0aW9uX2R1bW1pZXMpICMgTGlzdGUgYWxsZXIgVmFyaWFibGVuCiNub3JtX3ZhbHVlc19saXN0IDwtIGdldC5ub3JtX3ZhbHVlcyhob3VzZV9wcmljaW5nX2R1bW15LCBub3JtX2xpc3QpICAgICMgQmVyZWNobnVuZyBkZXIgTWl0dGVsd2VydGUgdW5kIFN0ZC4tQWJ3LiBkZXIgVmFyaWFibGVuCiNob3VzZV9wcmljaW5nX25vcm0gPC0gbm9ybV9jb2xzKGhvdXNlX3ByaWNpbmdfZHVtbXksIG5vcm1fdmFsdWVzX2xpc3QpICMgU3RhbmRhcmRpc2llcnVuZyBkZXIgVmFyaWFibGVuCgpub3JtX2xpc3QgPC0gYygiVW1zYXR6IiwgIlRlbXBlcmF0dXIiLCBXYXJlbmdydXBwZV9kdW1taWVzLCBXb2NoZW50YWdfZHVtbWllcykKIyBMaXN0ZSBhbGxlciBWYXJpYWJsZW4Kbm9ybV92YWx1ZXNfbGlzdCA8LSBnZXQubm9ybV92YWx1ZXMobnVtc2F0el9kdW1teSwgbm9ybV9saXN0KSAgIAojIEJlcmVjaG51bmcgZGVyIE1pdHRlbHdlcnRlIHVuZCBTdGQuLUFidy4gZGVyIFZhcmlhYmxlbgpudW1zYXR6X25vcm0gPC0gbm9ybV9jb2xzKG51bXNhdHpfZHVtbXksIG5vcm1fdmFsdWVzX2xpc3QpIAojIFN0YW5kYXJkaXNpZXJ1bmcgZGVyIFZhcmlhYmxlbgoKCgojIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMKIyMjIERlZmluaXRpb24gZGVyIEZlYXR1cmUtVmFyaWFibGVuIHVuZCBkZXIgTGFiZWwtVmFyaWFibGUgIyMjIwoKIyBEZWZpbml0aW9uIGRlciBGZWF0dXJlcyAoZGVyIHVuYWJow6RuZ2lnZW4gVmFyaWFibGVuIGF1ZiBkZXJlbiBCYXNpcyBkaWUgVm9yaGVyc2FnZW4gZXJ6ZXVndCB3ZXJkZW4gc29sbGVuKQpmZWF0dXJlcyA9IGMoJ1RlbXBlcmF0dXInLCBXYXJlbmdydXBwZV9kdW1taWVzLCBXb2NoZW50YWdfZHVtbWllcykKIyBEZWZpbml0aW9uIGRlciBMYWJlbC1WYXJpYWJsZSAoZGVyIGFiaGFlbmdpZ2VuIFZhcmlhYmxlLCBkaWUgdm9yaGVyZ2VzYWd0IHdlcmRlbiBzb2xsKSBzb3dpZQpsYWJlbCA9ICdVbXNhdHonCgoKIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjCiMjIyBEZWZpbml0aW9uIHZvbiBUcmFpbmluZ3MtIHVuZCBUZXN0ZGF0ZW5zYXR6ICMjIyMKCiMgWnVmYWxsc3rDpGhsZXIgc2V0emVuLCB1bSBkaWUgenVmw6RsbGlnZSBQYXJ0aXRpb25pZXJ1bmcgYmVpIGplZGVtIER1cmNobGF1ZiBnbGVpY2ggenUgaGFsdGVuCnNldC5zZWVkKDEpCiMgQmVzdGltbXVuZyBkZXIgSW5kaXplcyBkZXMgVHJhaW5pbnNkYXRlbnNhdHplcwp0cmFpbl9pbmQgPC0gc2FtcGxlKHNlcV9sZW4obnJvdyhudW1zYXR6X25vcm0pKSwgc2l6ZSA9IGZsb29yKDAuNjYgKiBucm93KG51bXNhdHpfbm9ybSkpKQoKIyBUZWlsZW4gaW4gVHJhaW5pbmdzLSB1bmQgVGVzdGRhdGVuc2F0egp0cmFpbl9kYXRhc2V0ID0gbnVtc2F0el9ub3JtW3RyYWluX2luZCwgZmVhdHVyZXNdCnRlc3RfZGF0YXNldCA9IG51bXNhdHpfbm9ybVstdHJhaW5faW5kLCBmZWF0dXJlc10KCiMgU2VsZWt0aW9uIGRlciBWYXJpYWJsZSwgZGllIGFscyBMYWJlbCBkZWZpbmllcnQgd3VyZGUKdHJhaW5fbGFiZWxzID0gbnVtc2F0el9ub3JtW3RyYWluX2luZCwgbGFiZWxdCnRlc3RfbGFiZWxzID0gbnVtc2F0el9ub3JtWy10cmFpbl9pbmQsIGxhYmVsXQoKVGhpcyBpcyBhbiBbUiBNYXJrZG93bl0oaHR0cDovL3JtYXJrZG93bi5yc3R1ZGlvLmNvbSkgTm90ZWJvb2suIFdoZW4geW91IGV4ZWN1dGUgY29kZSB3aXRoaW4gdGhlIG5vdGVib29rLCB0aGUgcmVzdWx0cyBhcHBlYXIgYmVuZWF0aCB0aGUgY29kZS4gCgpUcnkgZXhlY3V0aW5nIHRoaXMgY2h1bmsgYnkgY2xpY2tpbmcgdGhlICpSdW4qIGJ1dHRvbiB3aXRoaW4gdGhlIGNodW5rIG9yIGJ5IHBsYWNpbmcgeW91ciBjdXJzb3IgaW5zaWRlIGl0IGFuZCBwcmVzc2luZyAqQ21kK1NoaWZ0K0VudGVyKi4gCgpgYGB7cn0KcGxvdChjYXJzKQpgYGAKCkFkZCBhIG5ldyBjaHVuayBieSBjbGlja2luZyB0aGUgKkluc2VydCBDaHVuayogYnV0dG9uIG9uIHRoZSB0b29sYmFyIG9yIGJ5IHByZXNzaW5nICpDbWQrT3B0aW9uK0kqLgoKV2hlbiB5b3Ugc2F2ZSB0aGUgbm90ZWJvb2ssIGFuIEhUTUwgZmlsZSBjb250YWluaW5nIHRoZSBjb2RlIGFuZCBvdXRwdXQgd2lsbCBiZSBzYXZlZCBhbG9uZ3NpZGUgaXQgKGNsaWNrIHRoZSAqUHJldmlldyogYnV0dG9uIG9yIHByZXNzICpDbWQrU2hpZnQrSyogdG8gcHJldmlldyB0aGUgSFRNTCBmaWxlKS4gCgpUaGUgcHJldmlldyBzaG93cyB5b3UgYSByZW5kZXJlZCBIVE1MIGNvcHkgb2YgdGhlIGNvbnRlbnRzIG9mIHRoZSBlZGl0b3IuIENvbnNlcXVlbnRseSwgdW5saWtlICpLbml0KiwgKlByZXZpZXcqIGRvZXMgbm90IHJ1biBhbnkgUiBjb2RlIGNodW5rcy4gSW5zdGVhZCwgdGhlIG91dHB1dCBvZiB0aGUgY2h1bmsgd2hlbiBpdCB3YXMgbGFzdCBydW4gaW4gdGhlIGVkaXRvciBpcyBkaXNwbGF5ZWQuCgo=</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiUiBOb3RlYm9vayIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjCiMjIyBWb3JiZXJlaXR1bmcgZGVyIFVtZ2VidW5nICMjIyMKYGBge3J9CiMgRmFsbHMgbmljaHQgaW5zdGFsbGllcnQgZ2dmLiBmb2xnZW5kZXMgUGFrZXQgYXVzZsO8aHJlbgojaW5zdGFsbC5wYWNrYWdlcygiZmFzdER1bW1pZXMiKQoKIyBVbWdlYnVuZ3N2YXJpYWJsZW4gbMO2c2NoZW4KcmVtb3ZlKGxpc3QgPSBscygpKQoKIyBFaW5iaW5kZW4gYmVuw7Z0aWd0ZXIgRnVua3Rpb25zYmlibGlvdGhla2VuCmxpYnJhcnkocmVhZHIpCmxpYnJhcnkoZmFzdER1bW1pZXMpCgpsaWJyYXJ5KGRwbHlyKQpgYGAKIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjCiMjIyBGdW5rdGlvbnNkZWZpbml0aW9uZW4gIyMjIwpgYGB7cn0KIycgVGl0bGUgRmFzdCBjcmVhdGlvbiBvZiBub3JtYWxpemVkIHZhcmlhYmxlcwojJyBRdWlja2x5IGNyZWF0ZSBub3JtYWxpemVkIGNvbHVtbnMgZnJvbSBudW1lcmljIHR5cGUgY29sdW1ucyBpbiB0aGUgaW5wdXQgZGF0YS4gVGhpcyBmdW5jdGlvbiBpcyB1c2VmdWwgZm9yIHN0YXRpc3RpY2FsIGFuYWx5c2lzIHdoZW4geW91IHdhbnQgbm9ybWFsaXplZCBjb2x1bW5zIHJhdGhlciB0aGFuIHRoZSBhY3R1YWwgY29sdW1ucy4KIycKIycgQHBhcmFtIC5kYXRhIEFuIG9iamVjdCB3aXRoIHRoZSBkYXRhIHNldCB5b3Ugd2FudCB0byBtYWtlIG5vcm1hbGl6ZWQgY29sdW1ucyBmcm9tLgojJyBAcGFyYW0gbm9ybV92YWx1ZXMgRGF0YWZyYW1lIG9mIGNvbHVtbiBuYW1lcywgbWVhbnMsIGFuZCBzdGFuZGFyZCBkZXZpYXRpb25zIHRoYXQgaXMgdXNlZCB0byBjcmVhdGUgY29ycmVzcG9uZGluZyBub3JtYWxpemVkIHZhcmlhYmxlcyBmcm9tLgojJwojJyBAcmV0dXJuIEEgZGF0YS5mcmFtZSAob3IgdGliYmxlIG9yIGRhdGEudGFibGUsIGRlcGVuZGluZyBvbiBpbnB1dCBkYXRhIHR5cGUpIHdpdGggc2FtZSBudW1iZXIgb2Ygcm93cyBhbiBkY29sdW1ucyBhcyB0aGUgaW5wdXR0ZWQgZGF0YSwgb25seSB3aXRoIG5vcm1hbGl6ZWQgY29sdW1ucyBmb3IgdGhlIHZhcmlhYmxlcyBpbmRpY2F0ZWQgaW4gdGhlIG5vcm1fdmFsdWVzIGFyZ3VtZW50LgojJyBAZXhwb3J0CiMnCiMnIEBleGFtcGxlcwpub3JtX2NvbHMgPC0gZnVuY3Rpb24gKC5kYXRhLCBub3JtX3ZhbHVlcyA9IE5VTEwpIHsKICBmb3IgKGkgaW4gMTpucm93KG5vcm1fdmFsdWVzKSAgKSB7CiAgICAuZGF0YVtbbm9ybV92YWx1ZXMkbmFtZVtpXV1dIDwtICguZGF0YVtbbm9ybV92YWx1ZXMkbmFtZVtpXV1dIC0gbm9ybV92YWx1ZXMkbWVhbltpXSkgLyBub3JtX3ZhbHVlcyRzZFtpXQogIH0KICByZXR1cm4gKC5kYXRhKQp9CgoKIycgVGl0bGUgQ3JlYXRpb24gb2YgYSBEYXRhZnJhbWUgaW5jbHVkaW5nIHRoZSBJbmZvcm1hdGlvbiB0byBTdGFuZGFyZGl6ZSBWYXJpYWJsZXMKIycgVGhpcyBmdW5jdGlvbiBpcyBtZWFudCB0byBiZSB1c2VkIGluIGNvbWJpbmF0aW9uIHdpdGggdGhlIGZ1bmN0aW9uIG5vcm1fY29scwojJwojJyBAcGFyYW0gLmRhdGEgQSBkYXRhIHNldCBpbmNsdWRpbmcgdGhlIHZhcmlhYmxlcyB5b3Ugd2FudCB0byBnZXQgdGhlIG1lYW5zIGFuZCBzdGFuZGFyZCBkZXZpYXRpb25zIGZyb20uCiMnIEBwYXJhbSBzZWxlY3RfY29sdW1ucyBBIHZlY3RvciB3aXRoIGEgbGlzdCBvZiB2YXJpYWJsZSBuYW1lcyBmb3Igd2hpY2ggeW91IHdhbnQgdG8gZ2V0IHRoZSBtZWFucyBhbmQgc3RhbmRhcmQgZGV2aWF0aW9ucyBmcm9tLgojJwojJyBAcmV0dXJuIEEgZGF0YS5mcmFtZSAob3IgdGliYmxlIG9yIGRhdGEudGFibGUsIGRlcGVuZGluZyBvbiBpbnB1dCBkYXRhIHR5cGUpIGluY2x1ZGluZyB0aGUgbmFtZXMsIG1lYW5zLCBhbmQgc3RhbmRhcmQgZGV2aWF0aW9ucyBvZiB0aGUgdmFyaWFibGVzIGluY2x1ZGVkIGluIHRoZSBzZWxlY3RfY29sdW1ucyBhcmd1bWVudC4KIycgQGV4cG9ydAojJwojJyBAZXhhbXBsZXMKZ2V0Lm5vcm1fdmFsdWVzIDwtIGZ1bmN0aW9uICguZGF0YSwgc2VsZWN0X2NvbHVtbnMgPSBOVUxMKSB7CiAgcmVzdWx0IDwtIE5VTEwKICBmb3IgKGNvbF9uYW1lIGluIHNlbGVjdF9jb2x1bW5zKSB7CiAgICBtZWFuIDwtIG1lYW4oLmRhdGFbW2NvbF9uYW1lXV0sIG5hLnJtID0gVFJVRSkKICAgIHNkIDwtIHNkKC5kYXRhW1tjb2xfbmFtZV1dLCBuYS5ybSA9IFRSVUUpCiAgICByZXN1bHQgPC0gcmJpbmQgKHJlc3VsdCwgYyhtZWFuLCBzZCkpCiAgfQogIHJlc3VsdCA8LSBhcy5kYXRhLmZyYW1lKHJlc3VsdCwgc3RyaW5nc0FzRmFjdG9ycyA9IEZBTFNFKQogIHJlc3VsdCA8LSBkYXRhLmZyYW1lIChzZWxlY3RfY29sdW1ucywgcmVzdWx0LCBzdHJpbmdzQXNGYWN0b3JzID0gRkFMU0UpCiAgbmFtZXMocmVzdWx0KSA8LSBjKCJuYW1lIiwgIm1lYW4iLCAic2QiKQogIHJldHVybiAocmVzdWx0KQp9CmBgYAoKCiMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIwojIyMgRGF0ZW5pbXBvcnQgIyMjIwpgYGB7cn0KIyBFaW5sZXNlbiBkZXIgRGF0ZW4KI2hvdXNlX3ByaWNpbmcgPC0gcmVhZF9jc3YoImh0dHBzOi8vcmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbS9vcGVuY2FtcHVzLXNoL3Nvc2UyMC1kYXRhc2NpZW5jZS9tYXN0ZXIvaG91c2VfcHJpY2luZ190ZXN0LmNzdiIpCnVtc2F0emRhdGVuIDwtIHJlYWRfY3N2KCJ1bXNhdHpkYXRlbl9nZWt1ZXJ6dC5jc3YiKQp3ZXR0ZXIgPC0gcmVhZF9jc3YoIndldHRlci5jc3YiKQpmZWllcnRhZ2UgPC0gcmVhZC5jc3YoImZlaWVydGFnZS5jc3YiLCBzZXA9ICI7IikKIyBTcGxpdHRldCBkdXJjaCAnOycgZ2V0cmVubnRlIERhdGVuIGluIGVpZ2VuZSBTcGFsdGVuCmtpd28gPC0gcmVhZC5jc3YoImtpd28uY3N2IikKCgpraXdvJERhdHVtIDwtIGFzLkRhdGUoa2l3byREYXR1bSkKIyBLb3ZlcnRpZXJ0IGRpZSBTcGFsdGUgJ0RhdHVtJyBpbiBkYXMgJ0RhdGUnLUZvcm1hdAoKbnVtc2F0eiA8LSBsZWZ0X2pvaW4odW1zYXR6ZGF0ZW4sd2V0dGVyKQpudW1zYXR6JFdvY2hlbnRhZyA8LSB3ZWVrZGF5cyhhcy5EYXRlKG51bXNhdHokRGF0dW0pKQpudW1zYXR6IDwtIGxlZnRfam9pbihudW1zYXR6LCB1bmlxdWUoa2l3bykpIAojRHVyY2ggdW5pcXVlIHdlcmRlbiBFeHRyYXNwYWx0ZW4gd2llICdEYXR1bS54JyB2ZXJoaW5kZXJ0CgoKZmVpZXJ0YWdlJERhdHVtIDwtIGFzLkRhdGUoZmVpZXJ0YWdlJERhdHVtKSAKIyBLb3ZlcnRpZXJ0ZSBkaWUgU3BhbHRlICdEYXR1bScgaW4gZGFzICdEYXRlJy1Gb3JtYXQKCmZlaWVydGFnZSRGZWllcnRhZyA8LSAxICNhbGxlIEZlaWVydGFnZSBtaXQgMSBjb2RpZXJ0CgoKbnVtc2F0eiA8LSBsZWZ0X2pvaW4obnVtc2F0eiwgdW5pcXVlKGZlaWVydGFnZSkpIAojIHVuaXF1ZSB2ZXJoaW5kZXJ0IEV4dHJhc3BhbHRlbiB3aWUgJ0RhdHVtLnknCm51bXNhdHogPC0gbGVmdF9qb2luKG51bXNhdHosIGtpd28pCgpudW1zYXR6JEtpZWxlcldvY2hlW2lzLm5hKG51bXNhdHokS2llbGVyV29jaGUpXSA8LTAgCiNOQSB6dSBPCm51bXNhdHokRmVpZXJ0YWdbaXMubmEobnVtc2F0eiRGZWllcnRhZyldIDwtIDAgCiNOQSB6dSAwCm51bXNhdHokSGVpbGlnZXJhYmVuZF9kdW1teVtpcy5uYShudW1zYXR6JEhlaWxpZ2VyYWJlbmRfZHVtbXkpXSA8LSAwCm51bXNhdHokU2lsdmVzdGVyX2R1bW15W2lzLm5hKG51bXNhdHokU2lsdmVzdGVyX2R1bW15KV0gPC0gMApudW1zYXR6JFdldHRlcmNvZGVbaXMubmEobnVtc2F0eiRXZXR0ZXJjb2RlKV0gPC0gMCAKI05BIHp1IDAKClZpZXcobnVtc2F0eikKYGBgCiMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIwojIyMgRGF0ZW5hdWZiZXJlaXR1bmcgIyMjIwpgYGB7cn0KIyBSZWtvZGllcnVuZyB2b24ga2F0ZWdvcmllbGxlbiBWYXJpYWJsZW4gKHp1IER1bW15LVZhcmlhYmxlbikKI2R1bW15X2xpc3QgPC0gYygidmlldyIsICJjb25kaXRpb24iKQojaG91c2VfcHJpY2luZ19kdW1teSA9IGR1bW15X2NvbHMoaG91c2VfcHJpY2luZywgZHVtbXlfbGlzdCkKZHVtbXlfbGlzdCA8LSBjKCJXYXJlbmdydXBwZSIsICJXb2NoZW50YWciKQpudW1zYXR6X2R1bW15ID0gZHVtbXlfY29scyhudW1zYXR6LCBkdW1teV9saXN0KQoKIyBEZWZpbml0aW9uIHZvbiBWYXJpYWJsZW5saXN0ZW4gZsO8ciBkaWUgRHVtbWllcywgdW0gZGFzIEFyYmVpdGVuIG1pdCBkaWVzZW4genUgZXJsZWljaHRlcm4KI2NvbmRpdGlvbl9kdW1taWVzID0gYygnY29uZGl0aW9uXzEnLCAnY29uZGl0aW9uXzInLCAnY29uZGl0aW9uXzMnLCAnY29uZGl0aW9uXzQnLCAnY29uZGl0aW9uXzUnKQojdmlld19kdW1taWVzID0gYygndmlld18wJywgJ3ZpZXdfMScsICd2aWV3XzInLCAndmlld18zJywndmlld180JykKCldhcmVuZ3J1cHBlX2R1bW1pZXMgPSBjKCdXYXJlbmdydXBwZV8xJywgJ1dhcmVuZ3J1cHBlXzInLCAnV2FyZW5ncnVwcGVfMycsICdXYXJlbmdydXBwZV80JywgJ1dhcmVuZ3J1cHBlXzUnLCAnV2FyZW5ncnVwcGVfNicpCiNXb2NoZW50YWdfZHVtbWllcyA9IGMoJ1dvY2hlbnRhZ18xJywgJ1dvY2hlbnRhZ18yJywgJ1dvY2hlbnRhZ18zJywgJ1dvY2hlbnRhZ180JywgJ1dvY2hlbnRhZ181JywgJ1dXb2NoZW50YWdfNicsICdXV29jaGVudGFnXzcnKQpXb2NoZW50YWdfZHVtbWllcyA9IGMoJ1dvY2hlbnRhZ19Nb250YWcnLCAnV29jaGVudGFnX0RpZW5zdGFnJywgJ1dvY2hlbnRhZ19NaXR0d29jaCcsICdXb2NoZW50YWdfRG9ubmVyc3RhZycsICdXb2NoZW50YWdfRnJlaXRhZycsICdXb2NoZW50YWdfU2Ftc3RhZycsICdXb2NoZW50YWdfU29ubnRhZycpCgpgYGAKYGBge3J9CiMgU3RhbmRhcmRpc2llcnVuZyBhbGxlciBGZWF0dXJlIFZhcmlhYmxlbiB1bmQgZGVyIExhYmVsIFZhcmlhYmxlCiNub3JtX2xpc3QgPC0gYygicHJpY2UiLCAic3FmdF9sb3QiLCAiYmF0aHJvb21zIiwgImdyYWRlIiwgIndhdGVyZnJvbnQiLCB2aWV3X2R1bW1pZXMsIGNvbmRpdGlvbl9kdW1taWVzKSAjIExpc3RlIGFsbGVyIFZhcmlhYmxlbgojbm9ybV92YWx1ZXNfbGlzdCA8LSBnZXQubm9ybV92YWx1ZXMoaG91c2VfcHJpY2luZ19kdW1teSwgbm9ybV9saXN0KSAgICAjIEJlcmVjaG51bmcgZGVyIE1pdHRlbHdlcnRlIHVuZCBTdGQuLUFidy4gZGVyIFZhcmlhYmxlbgojaG91c2VfcHJpY2luZ19ub3JtIDwtIG5vcm1fY29scyhob3VzZV9wcmljaW5nX2R1bW15LCBub3JtX3ZhbHVlc19saXN0KSAjIFN0YW5kYXJkaXNpZXJ1bmcgZGVyIFZhcmlhYmxlbgoKCgoKbm9ybV9saXN0IDwtIGMoIlVtc2F0eiIsICJUZW1wZXJhdHVyIiwgV2FyZW5ncnVwcGVfZHVtbWllcywgV29jaGVudGFnX2R1bW1pZXMpCiMgTGlzdGUgYWxsZXIgVmFyaWFibGVuCm5vcm1fdmFsdWVzX2xpc3QgPC0gZ2V0Lm5vcm1fdmFsdWVzKG51bXNhdHpfZHVtbXksIG5vcm1fbGlzdCkgICAKIyBCZXJlY2hudW5nIGRlciBNaXR0ZWx3ZXJ0ZSB1bmQgU3RkLi1BYncuIGRlciBWYXJpYWJsZW4KbnVtc2F0el9ub3JtIDwtIG5vcm1fY29scyhudW1zYXR6X2R1bW15LCBub3JtX3ZhbHVlc19saXN0KSAKIyBTdGFuZGFyZGlzaWVydW5nIGRlciBWYXJpYWJsZW4KYGBgCgoKIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjCiMjIyBEZWZpbml0aW9uIGRlciBGZWF0dXJlLVZhcmlhYmxlbiB1bmQgZGVyIExhYmVsLVZhcmlhYmxlICMjIyMKYGBge3J9CiMgRGVmaW5pdGlvbiBkZXIgRmVhdHVyZXMgKGRlciB1bmFiaMOkbmdpZ2VuIFZhcmlhYmxlbiBhdWYgZGVyZW4gQmFzaXMgZGllIFZvcmhlcnNhZ2VuIGVyemV1Z3Qgd2VyZGVuIHNvbGxlbikKZmVhdHVyZXMgPSBjKCdUZW1wZXJhdHVyJywgV2FyZW5ncnVwcGVfZHVtbWllcywgV29jaGVudGFnX2R1bW1pZXMpCiMgRGVmaW5pdGlvbiBkZXIgTGFiZWwtVmFyaWFibGUgKGRlciBhYmhhZW5naWdlbiBWYXJpYWJsZSwgZGllIHZvcmhlcmdlc2FndCB3ZXJkZW4gc29sbCkgc293aWUKbGFiZWwgPSAnVW1zYXR6JwpgYGAKCiMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIwojIyMgRGVmaW5pdGlvbiB2b24gVHJhaW5pbmdzLSB1bmQgVGVzdGRhdGVuc2F0eiAjIyMjCmBgYHtyfQojIFp1ZmFsbHN6w6RobGVyIHNldHplbiwgdW0gZGllIHp1ZsOkbGxpZ2UgUGFydGl0aW9uaWVydW5nIGJlaSBqZWRlbSBEdXJjaGxhdWYgZ2xlaWNoIHp1IGhhbHRlbgpzZXQuc2VlZCgxKQojIEJlc3RpbW11bmcgZGVyIEluZGl6ZXMgZGVzIFRyYWluaW5zZGF0ZW5zYXR6ZXMKdHJhaW5faW5kIDwtIHNhbXBsZShzZXFfbGVuKG5yb3cobnVtc2F0el9ub3JtKSksIHNpemUgPSBmbG9vcigwLjY2ICogbnJvdyhudW1zYXR6X25vcm0pKSkKCiMgVGVpbGVuIGluIFRyYWluaW5ncy0gdW5kIFRlc3RkYXRlbnNhdHoKdHJhaW5fZGF0YXNldCA9IG51bXNhdHpfbm9ybVt0cmFpbl9pbmQsIGZlYXR1cmVzXQp0ZXN0X2RhdGFzZXQgPSBudW1zYXR6X25vcm1bLXRyYWluX2luZCwgZmVhdHVyZXNdCgojIFNlbGVrdGlvbiBkZXIgVmFyaWFibGUsIGRpZSBhbHMgTGFiZWwgZGVmaW5pZXJ0IHd1cmRlCnRyYWluX2xhYmVscyA9IG51bXNhdHpfbm9ybVt0cmFpbl9pbmQsIGxhYmVsXQp0ZXN0X2xhYmVscyA9IG51bXNhdHpfbm9ybVstdHJhaW5faW5kLCBsYWJlbF0KYGBgCgoKCgoKCgoK</div>
 
 
 
