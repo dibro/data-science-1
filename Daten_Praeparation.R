@@ -155,13 +155,13 @@ numsatz_dummy$Warengruppe_4[is.na(numsatz_dummy$Warengruppe_4)] <- 0
 numsatz_dummy$Warengruppe_5[is.na(numsatz_dummy$Warengruppe_5)] <- 0
 numsatz_dummy$Warengruppe_6[is.na(numsatz_dummy$Warengruppe_6)] <- 0
 
-numsatz_dummy$Wochentag_Friday[is.na(numsatz_dummy$Wochentag_Friday)] <- 0
-numsatz_dummy$Wochentag_Saturday[is.na(numsatz_dummy$Wochentag_Saturday)] <- 0
-numsatz_dummy$Wochentag_Sunday[is.na(numsatz_dummy$Wochentag_Sunday)] <- 0
-numsatz_dummy$Wochentag_Monday[is.na(numsatz_dummy$Wochentag_Monday)] <- 0
-numsatz_dummy$Wochentag_Tuesday[is.na(numsatz_dummy$Wochentag_Tuesday)] <- 0
-numsatz_dummy$Wochentag_Wednesday[is.na(numsatz_dummy$Wochentag_Wednesday)] <- 0
-numsatz_dummy$Wochentag_Thursday[is.na(numsatz_dummy$Wochentag_Thursday)] <- 0
+numsatz_dummy$Wochentag_Freitag[is.na(numsatz_dummy$Wochentag_Freitag)] <- 0
+numsatz_dummy$Wochentag_Samstag[is.na(numsatz_dummy$Wochentag_Samstag)] <- 0
+numsatz_dummy$Wochentag_Sonntag[is.na(numsatz_dummy$Wochentag_Sonntag)] <- 0
+numsatz_dummy$Wochentag_Montag[is.na(numsatz_dummy$Wochentag_Montag)] <- 0
+numsatz_dummy$Wochentag_Dienstag[is.na(numsatz_dummy$Wochentag_Dienstag)] <- 0
+numsatz_dummy$Wochentag_Mittwoch[is.na(numsatz_dummy$Wochentag_Mittwoch)] <- 0
+numsatz_dummy$Wochentag_Donnerstag[is.na(numsatz_dummy$Wochentag_Donnerstag)] <- 0
 
 # Definition von Variablenlisten für die Dummies, um das Arbeiten mit diesen zu erleichtern
 #condition_dummies = c('condition_1', 'condition_2', 'condition_3', 'condition_4', 'condition_5')
