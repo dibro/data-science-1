@@ -28,8 +28,7 @@ use_condaenv("r-reticulate")
 
 ### Aufruf des Skripts zur Datenaufbereitung
 ```{r}
-#source("umsatz-data-preparation.R")
-source("Data_preparation_german_combined.R")
+source("Daten_Praeparation.R")
 
 ```
 
