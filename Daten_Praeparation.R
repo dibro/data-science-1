@@ -66,6 +66,16 @@ get.norm_values <- function (.data, select_columns = NULL) {
 #house_pricing <- read_csv("https://raw.githubusercontent.com/opencampus-sh/sose20-datascience/master/house_pricing_test.csv")
 umsatzdaten <- read_csv("umsatzdaten_gekuerzt.csv")
 
+neues_datum <- as.Date("2019-06-04")
+
+umsatzdaten[nrow(umsatzdaten) + 1,] = list(neues_datum, 1, 0)
+umsatzdaten[nrow(umsatzdaten) + 1,] = list(neues_datum, 2, 0)
+umsatzdaten[nrow(umsatzdaten) + 1,] = list(neues_datum, 3, 0)
+umsatzdaten[nrow(umsatzdaten) + 1,] = list(neues_datum, 4, 0)
+umsatzdaten[nrow(umsatzdaten) + 1,] = list(neues_datum, 5, 0)
+umsatzdaten[nrow(umsatzdaten) + 1,] = list(neues_datum, 6, 0)
+
+
 #Wettercodekategorien <- read_csv("Wettercodekategorie.csv")
 #Umsatz_Wetter_Daten <- left_join(umsatzdaten, Wettercodekategorien)
 #Umsatz_Wetter <- cbind(umsatzdaten,Umsatz_Wetter_Daten$Wettercodekategorie)
@@ -147,23 +157,23 @@ View(numsatz)
 # Rekodierung von kategoriellen Variablen (zu Dummy-Variablen)
 #dummy_list <- c("view", "condition")
 #house_pricing_dummy = dummy_cols(house_pricing, dummy_list)
-dummy_list <- c("Warengruppe", "Wochentag")
+dummy_list <- c("Warengruppe", "Wochentag", "Regen")
 numsatz_dummy = dummy_cols(numsatz, dummy_list)
 
-numsatz_dummy$Warengruppe_1[is.na(numsatz_dummy$Warengruppe_1)] <- 0
-numsatz_dummy$Warengruppe_2[is.na(numsatz_dummy$Warengruppe_2)] <- 0
-numsatz_dummy$Warengruppe_3[is.na(numsatz_dummy$Warengruppe_3)] <- 0
-numsatz_dummy$Warengruppe_4[is.na(numsatz_dummy$Warengruppe_4)] <- 0
-numsatz_dummy$Warengruppe_5[is.na(numsatz_dummy$Warengruppe_5)] <- 0
-numsatz_dummy$Warengruppe_6[is.na(numsatz_dummy$Warengruppe_6)] <- 0
+#numsatz_dummy$Warengruppe_1[is.na(numsatz_dummy$Warengruppe_1)] <- 0
+#numsatz_dummy$Warengruppe_2[is.na(numsatz_dummy$Warengruppe_2)] <- 0
+#numsatz_dummy$Warengruppe_3[is.na(numsatz_dummy$Warengruppe_3)] <- 0
+#numsatz_dummy$Warengruppe_4[is.na(numsatz_dummy$Warengruppe_4)] <- 0
+#numsatz_dummy$Warengruppe_5[is.na(numsatz_dummy$Warengruppe_5)] <- 0
+#numsatz_dummy$Warengruppe_6[is.na(numsatz_dummy$Warengruppe_6)] <- 0
 
-numsatz_dummy$Wochentag_Freitag[is.na(numsatz_dummy$Wochentag_Freitag)] <- 0
-numsatz_dummy$Wochentag_Samstag[is.na(numsatz_dummy$Wochentag_Samstag)] <- 0
-numsatz_dummy$Wochentag_Sonntag[is.na(numsatz_dummy$Wochentag_Sonntag)] <- 0
-numsatz_dummy$Wochentag_Montag[is.na(numsatz_dummy$Wochentag_Montag)] <- 0
-numsatz_dummy$Wochentag_Dienstag[is.na(numsatz_dummy$Wochentag_Dienstag)] <- 0
-numsatz_dummy$Wochentag_Mittwoch[is.na(numsatz_dummy$Wochentag_Mittwoch)] <- 0
-numsatz_dummy$Wochentag_Donnerstag[is.na(numsatz_dummy$Wochentag_Donnerstag)] <- 0
+#numsatz_dummy$Wochentag_Freitag[is.na(numsatz_dummy$Wochentag_Freitag)] <- 0
+#numsatz_dummy$Wochentag_Samstag[is.na(numsatz_dummy$Wochentag_Samstag)] <- 0
+#numsatz_dummy$Wochentag_Sonntag[is.na(numsatz_dummy$Wochentag_Sonntag)] <- 0
+#numsatz_dummy$Wochentag_Montag[is.na(numsatz_dummy$Wochentag_Montag)] <- 0
+#numsatz_dummy$Wochentag_Dienstag[is.na(numsatz_dummy$Wochentag_Dienstag)] <- 0
+#numsatz_dummy$Wochentag_Mittwoch[is.na(numsatz_dummy$Wochentag_Mittwoch)] <- 0
+#numsatz_dummy$Wochentag_Donnerstag[is.na(numsatz_dummy$Wochentag_Donnerstag)] <- 0
 
 # Definition von Variablenlisten für die Dummies, um das Arbeiten mit diesen zu erleichtern
 #condition_dummies = c('condition_1', 'condition_2', 'condition_3', 'condition_4', 'condition_5')
@@ -174,13 +184,14 @@ Warengruppe_dummies = c('Warengruppe_1', 'Warengruppe_2', 'Warengruppe_3', 'Ware
 #Wochentag_dummies = c('Wochentag_Monday', 'Wochentag_Tuesday', 'Wochentag_Wednesday', 'Wochentag_Thursday', 'Wochentag_Friday', 'Wochentag_Saturday', 'Wochentag_Sunday')
 Wochentag_dummies = c('Wochentag_Montag', 'Wochentag_Dienstag', 'Wochentag_Mittwoch', 'Wochentag_Donnerstag', 'Wochentag_Freitag', 'Wochentag_Samstag', 'Wochentag_Sonntag')
 
+Regen_dummies = c('Regen_0', 'Regen_1')
 
 # Standardisierung aller Feature Variablen und der Label Variable
 #norm_list <- c("price", "sqft_lot", "bathrooms", "grade", "waterfront", view_dummies, condition_dummies) # Liste aller Variablen
 #norm_values_list <- get.norm_values(house_pricing_dummy, norm_list)    # Berechnung der Mittelwerte und Std.-Abw. der Variablen
 #house_pricing_norm <- norm_cols(house_pricing_dummy, norm_values_list) # Standardisierung der Variablen
 
-norm_list <- c("Umsatz", "Temperatur", Warengruppe_dummies, Wochentag_dummies)
+norm_list <- c("Umsatz", "Temperatur", Warengruppe_dummies, Wochentag_dummies, Regen_dummies)
 # Liste aller Variablen
 norm_values_list <- get.norm_values(numsatz_dummy, norm_list)   
 # Berechnung der Mittelwerte und Std.-Abw. der Variablen
@@ -193,7 +204,7 @@ numsatz_norm <- norm_cols(numsatz_dummy, norm_values_list)
 ### Definition der Feature-Variablen und der Label-Variable ####
 
 # Definition der Features (der unabhängigen Variablen auf deren Basis die Vorhersagen erzeugt werden sollen)
-features = c('Temperatur', Warengruppe_dummies, Wochentag_dummies)
+features = c('Temperatur', Warengruppe_dummies, Wochentag_dummies, Regen_dummies)
 # Definition der Label-Variable (der abhaengigen Variable, die vorhergesagt werden soll) sowie
 label = 'Umsatz'
 
