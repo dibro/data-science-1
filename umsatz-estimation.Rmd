@@ -118,7 +118,9 @@ model = keras.models.load_model("python_model_best.h5")
 train_predictions_norm <- py$model$predict(train_dataset)
 test_predictions_norm <- py$model$predict(test_dataset)
 
-predict_dataset = numsatz_norm[10806, features]
+predict_dataset <- numsatz_norm[numsatz_norm$Datum=="2019-06-04", features]
+
+#predict_dataset <- numsatz_norm[10790, features]
 predict_predictions_norm <- py$model$predict(predict_dataset)
 
 # Rückberechnung der normierten Umsatzschätzungen zu den tatsächlichen Umsatzeschätzungen bzw. Umsätzen
@@ -171,7 +173,10 @@ ggplot(data_test[1:3676,]) +
 ```{r}
 # Vorhersage für einen einzelnen Fall
 #cat(paste0("Vorhergesagter Umsatz:\t", format(test_predictions[1], digits=2, nsmall =0)))
-cat(paste0("Vorhergesagter Umsatz:\t", format(predict_predictions[1], digits=2, nsmall =0)))
+
+for(i in 1:6){
+  cat(paste0("\nVorhergesagter Umsatz - Warengruppe ", i, ":\t", format(predict_predictions[i], digits=2, nsmall =0)))
+}
 
 #cat(paste0("\nTatsächlicher Umsatz:\t", test_actuals[1]))
 
