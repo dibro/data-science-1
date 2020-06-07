@@ -114,14 +114,20 @@ model = keras.models.load_model("python_model_best.h5")
 
 ### Auswertung der Schätzergebnisse ###
 ```{r}
-# Schätzung der (normierten) Preise für die Trainings- und Testdaten
+# Schätzung der (normierten) Umsätze für die Trainings- und Testdaten
 train_predictions_norm <- py$model$predict(train_dataset)
 test_predictions_norm <- py$model$predict(test_dataset)
 
-# Rückberechnung der normierten Preisschätzungen zu den tatsächlichen Preisschätzungen bzw. Preisen
+predict_dataset = numsatz_norm[10806, features]
+predict_predictions_norm <- py$model$predict(predict_dataset)
+
+# Rückberechnung der normierten Umsatzschätzungen zu den tatsächlichen Umsatzeschätzungen bzw. Umsätzen
 train_predictions <- (train_predictions_norm * norm_values_list$sd[1] ) + norm_values_list$mean[1]
 test_predictions <- (test_predictions_norm * norm_values_list$sd[1]) + norm_values_list$mean[1]
-# Selektion der zugehörigen tatsächlichen Preise
+
+predict_predictions <- (predict_predictions_norm * norm_values_list$sd[1]) + norm_values_list$mean[1]
+
+# Selektion der zugehörigen tatsächlichen Umsätze
 train_actuals <- numsatz$Umsatz[train_ind]
 test_actuals <- numsatz$Umsatz[-train_ind]
 
@@ -142,7 +148,7 @@ data_train <- data.frame(prediction = train_predictions/1000, actual = train_act
 data_test <- data.frame(prediction = test_predictions/1000, actual = test_actuals/1000)
 
 # Plot der Ergebnisse der Trainingsdaten
-ggplot(data_train[1:100,]) +
+ggplot(data_train[1:7133,]) +
   geom_line( aes(x=1:length(prediction), y=prediction, colour = "Predicted Values" )) +
   geom_line( aes(x=1:length(actual), y=actual, colour = "Actual Values" )) +
   scale_colour_manual( values = c("Predicted Values"="blue", "Actual Values"="red") ) +
@@ -151,7 +157,7 @@ ggplot(data_train[1:100,]) +
   ylab("Umsatz in 1.000 EUR") 
 
 # Plot der Ergebnisse der Testdaten
-ggplot(data_test[1:100,]) +
+ggplot(data_test[1:3676,]) +
   geom_line( aes(x=1:length(prediction), y=prediction, colour = "Predicted Values" )) +
   geom_line( aes(x=1:length(actual), y=actual, colour = "Actual Values" )) +
   scale_colour_manual( values = c("Predicted Values"="blue", "Actual Values"="red") ) +
@@ -164,8 +170,10 @@ ggplot(data_test[1:100,]) +
 
 ```{r}
 # Vorhersage für einen einzelnen Fall
-cat(paste0("Vorhergesagter Umsatz:\t", format(test_predictions[100], digits=2, nsmall =0)))
-cat(paste0("\nTatsächlicher Umsatz:\t", test_actuals[100]))
+#cat(paste0("Vorhergesagter Umsatz:\t", format(test_predictions[1], digits=2, nsmall =0)))
+cat(paste0("Vorhergesagter Umsatz:\t", format(predict_predictions[1], digits=2, nsmall =0)))
+
+#cat(paste0("\nTatsächlicher Umsatz:\t", test_actuals[1]))
 
 
 ```
