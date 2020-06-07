@@ -125,6 +125,8 @@ numsatz$Bewoelkung[is.na(numsatz$Bewoelkung)] <- 0
 numsatz$Windgeschwindigkeit[is.na(numsatz$Windgeschwindigkeit)] <- 0
 numsatz$Regen[is.na(numsatz$Regen)] <- 0
 
+numsatz=numsatz[!is.na(numsatz$Temperatur),]
+
 any(is.na(numsatz$Datum))
 any(is.na(numsatz$Warengruppe))
 any(is.na(numsatz$Umsatz))
@@ -137,8 +139,6 @@ any(is.na(numsatz$Feiertag))
 any(is.na(numsatz$Heiligerabend_dummy))
 any(is.na(numsatz$Silvester_dummy))
 
-numsatz=numsatz[!is.na(numsatz$Temperatur),]
-
 View(numsatz)
 
 ###################################################
@@ -150,20 +150,20 @@ View(numsatz)
 dummy_list <- c("Warengruppe", "Wochentag")
 numsatz_dummy = dummy_cols(numsatz, dummy_list)
 
-numsatz_dummy$Warengruppe_1[is.na(numsatz_dummy$Warengruppe_1)] <- 0
-numsatz_dummy$Warengruppe_2[is.na(numsatz_dummy$Warengruppe_2)] <- 0
-numsatz_dummy$Warengruppe_3[is.na(numsatz_dummy$Warengruppe_3)] <- 0
-numsatz_dummy$Warengruppe_4[is.na(numsatz_dummy$Warengruppe_4)] <- 0
-numsatz_dummy$Warengruppe_5[is.na(numsatz_dummy$Warengruppe_5)] <- 0
-numsatz_dummy$Warengruppe_6[is.na(numsatz_dummy$Warengruppe_6)] <- 0
+#numsatz_dummy$Warengruppe_1[is.na(numsatz_dummy$Warengruppe_1)] <- 0
+#numsatz_dummy$Warengruppe_2[is.na(numsatz_dummy$Warengruppe_2)] <- 0
+#numsatz_dummy$Warengruppe_3[is.na(numsatz_dummy$Warengruppe_3)] <- 0
+#numsatz_dummy$Warengruppe_4[is.na(numsatz_dummy$Warengruppe_4)] <- 0
+#numsatz_dummy$Warengruppe_5[is.na(numsatz_dummy$Warengruppe_5)] <- 0
+#numsatz_dummy$Warengruppe_6[is.na(numsatz_dummy$Warengruppe_6)] <- 0
 
-numsatz_dummy$Wochentag_Freitag[is.na(numsatz_dummy$Wochentag_Freitag)] <- 0
-numsatz_dummy$Wochentag_Samstag[is.na(numsatz_dummy$Wochentag_Samstag)] <- 0
-numsatz_dummy$Wochentag_Sonntag[is.na(numsatz_dummy$Wochentag_Sonntag)] <- 0
-numsatz_dummy$Wochentag_Montag[is.na(numsatz_dummy$Wochentag_Montag)] <- 0
-numsatz_dummy$Wochentag_Dienstag[is.na(numsatz_dummy$Wochentag_Dienstag)] <- 0
-numsatz_dummy$Wochentag_Mittwoch[is.na(numsatz_dummy$Wochentag_Mittwoch)] <- 0
-numsatz_dummy$Wochentag_Donnerstag[is.na(numsatz_dummy$Wochentag_Donnerstag)] <- 0
+#numsatz_dummy$Wochentag_Freitag[is.na(numsatz_dummy$Wochentag_Freitag)] <- 0
+#numsatz_dummy$Wochentag_Samstag[is.na(numsatz_dummy$Wochentag_Samstag)] <- 0
+#numsatz_dummy$Wochentag_Sonntag[is.na(numsatz_dummy$Wochentag_Sonntag)] <- 0
+#numsatz_dummy$Wochentag_Montag[is.na(numsatz_dummy$Wochentag_Montag)] <- 0
+#numsatz_dummy$Wochentag_Dienstag[is.na(numsatz_dummy$Wochentag_Dienstag)] <- 0
+#numsatz_dummy$Wochentag_Mittwoch[is.na(numsatz_dummy$Wochentag_Mittwoch)] <- 0
+#numsatz_dummy$Wochentag_Donnerstag[is.na(numsatz_dummy$Wochentag_Donnerstag)] <- 0
 
 # Definition von Variablenlisten für die Dummies, um das Arbeiten mit diesen zu erleichtern
 #condition_dummies = c('condition_1', 'condition_2', 'condition_3', 'condition_4', 'condition_5')
