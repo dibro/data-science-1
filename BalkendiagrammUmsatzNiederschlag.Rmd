@@ -5,7 +5,6 @@ output:
     df_print: paged
 ---
 
-
 Einbinden ben?tigter Bibliotheken
 ```{r}
 library(readr)
