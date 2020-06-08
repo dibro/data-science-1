@@ -58,7 +58,6 @@ get.norm_values <- function (.data, select_columns = NULL) {
 }
 
 
-
 ###################################################
 ### Datenimport ####
 
@@ -74,17 +73,6 @@ umsatzdaten[nrow(umsatzdaten) + 1,] = list(neues_datum, 3, 0)
 umsatzdaten[nrow(umsatzdaten) + 1,] = list(neues_datum, 4, 0)
 umsatzdaten[nrow(umsatzdaten) + 1,] = list(neues_datum, 5, 0)
 umsatzdaten[nrow(umsatzdaten) + 1,] = list(neues_datum, 6, 0)
-
-
-#Wettercodekategorien <- read_csv("Wettercodekategorie.csv")
-#Umsatz_Wetter_Daten <- left_join(umsatzdaten, Wettercodekategorien)
-#Umsatz_Wetter <- cbind(umsatzdaten,Umsatz_Wetter_Daten$Wettercodekategorie)
-#Regen <- Umsatz_Wetter$`Umsatz_Wetter_Daten$Wettercodekategorie`
-#Regen[Regen!=7]<-0
-#Regen[Regen==7]<-1
-#numsatz <- cbind(umsatzdaten,Regen)
-#numsatz$Regen[is.na(numsatz$Regen)] <- 0
-
 
 wetter <- read_csv("wetter.csv")
 
@@ -102,6 +90,7 @@ numsatz <- numsatz[ -c(7) ]
 
 feiertage <- read.csv("feiertage.csv", sep= ";")
 # Splittet durch ';' getrennte Daten in eigene Spalten
+
 kiwo <- read.csv("kiwo.csv")
 
 kiwo$Datum <- as.Date(kiwo$Datum)
@@ -149,7 +138,7 @@ any(is.na(numsatz$Silvester_dummy))
 
 numsatz=numsatz[!is.na(numsatz$Temperatur),]
 
-View(numsatz)
+#View(numsatz)
 
 ###################################################
 ### Datenaufbereitung ####
@@ -160,27 +149,9 @@ View(numsatz)
 dummy_list <- c("Warengruppe", "Wochentag", "Regen")
 numsatz_dummy = dummy_cols(numsatz, dummy_list)
 
-#numsatz_dummy$Warengruppe_1[is.na(numsatz_dummy$Warengruppe_1)] <- 0
-#numsatz_dummy$Warengruppe_2[is.na(numsatz_dummy$Warengruppe_2)] <- 0
-#numsatz_dummy$Warengruppe_3[is.na(numsatz_dummy$Warengruppe_3)] <- 0
-#numsatz_dummy$Warengruppe_4[is.na(numsatz_dummy$Warengruppe_4)] <- 0
-#numsatz_dummy$Warengruppe_5[is.na(numsatz_dummy$Warengruppe_5)] <- 0
-#numsatz_dummy$Warengruppe_6[is.na(numsatz_dummy$Warengruppe_6)] <- 0
-
-#numsatz_dummy$Wochentag_Freitag[is.na(numsatz_dummy$Wochentag_Freitag)] <- 0
-#numsatz_dummy$Wochentag_Samstag[is.na(numsatz_dummy$Wochentag_Samstag)] <- 0
-#numsatz_dummy$Wochentag_Sonntag[is.na(numsatz_dummy$Wochentag_Sonntag)] <- 0
-#numsatz_dummy$Wochentag_Montag[is.na(numsatz_dummy$Wochentag_Montag)] <- 0
-#numsatz_dummy$Wochentag_Dienstag[is.na(numsatz_dummy$Wochentag_Dienstag)] <- 0
-#numsatz_dummy$Wochentag_Mittwoch[is.na(numsatz_dummy$Wochentag_Mittwoch)] <- 0
-#numsatz_dummy$Wochentag_Donnerstag[is.na(numsatz_dummy$Wochentag_Donnerstag)] <- 0
-
 # Definition von Variablenlisten für die Dummies, um das Arbeiten mit diesen zu erleichtern
-#condition_dummies = c('condition_1', 'condition_2', 'condition_3', 'condition_4', 'condition_5')
-#view_dummies = c('view_0', 'view_1', 'view_2', 'view_3','view_4')
 
 Warengruppe_dummies = c('Warengruppe_1', 'Warengruppe_2', 'Warengruppe_3', 'Warengruppe_4', 'Warengruppe_5', 'Warengruppe_6')
-#Wochentag_dummies = c('Wochentag_1', 'Wochentag_2', 'Wochentag_3', 'Wochentag_4', 'Wochentag_5', 'WWochentag_6', 'WWochentag_7')
 #Wochentag_dummies = c('Wochentag_Monday', 'Wochentag_Tuesday', 'Wochentag_Wednesday', 'Wochentag_Thursday', 'Wochentag_Friday', 'Wochentag_Saturday', 'Wochentag_Sunday')
 Wochentag_dummies = c('Wochentag_Montag', 'Wochentag_Dienstag', 'Wochentag_Mittwoch', 'Wochentag_Donnerstag', 'Wochentag_Freitag', 'Wochentag_Samstag', 'Wochentag_Sonntag')
 
@@ -199,7 +170,6 @@ numsatz_norm <- norm_cols(numsatz_dummy, norm_values_list)
 # Standardisierung der Variablen
 
 
-
 ###################################################
 ### Definition der Feature-Variablen und der Label-Variable ####
 
@@ -208,21 +178,25 @@ features = c('Temperatur', Warengruppe_dummies, Wochentag_dummies, Regen_dummies
 # Definition der Label-Variable (der abhaengigen Variable, die vorhergesagt werden soll) sowie
 label = 'Umsatz'
 
-
 ###################################################
 ### Definition von Trainings- und Testdatensatz ####
 
 # Zufallszähler setzen, um die zufällige Partitionierung bei jedem Durchlauf gleich zu halten
 set.seed(1)
+
+numsatz_subset <- numsatz
+numsatz_subset <- numsatz_subset[-c(10804:10809), ]
+
+numsatz_norm_subset <- numsatz_norm
+numsatz_norm_subset <- numsatz_norm_subset[-c(10804:10809), ]
+
 # Bestimmung der Indizes des Traininsdatensatzes
-train_ind <- sample(seq_len(nrow(numsatz_norm)), size = floor(0.66 * nrow(numsatz_norm)))
+train_ind <- sample(seq_len(nrow(numsatz_norm_subset)), size = floor(0.66 * nrow(numsatz_norm_subset)))
 
 # Teilen in Trainings- und Testdatensatz
-train_dataset = numsatz_norm[train_ind, features]
-test_dataset = numsatz_norm[-train_ind, features]
+train_dataset = numsatz_norm_subset[train_ind, features]
+test_dataset = numsatz_norm_subset[-train_ind, features]
 
 # Selektion der Variable, die als Label definiert wurde
-train_labels = numsatz_norm[train_ind, label]
-test_labels = numsatz_norm[-train_ind, label]
-
-
+train_labels = numsatz_norm_subset[train_ind, label]
+test_labels = numsatz_norm_subset[-train_ind, label]
