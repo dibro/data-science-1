@@ -1,0 +1,85 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+---
+
+
+Einbinden ben?tigter Bibliotheken
+```{r}
+library(readr)
+library(lubridate)
+library(ggplot2)
+library(dplyr)
+
+```
+
+
+Einlesen der Umsatzdaten
+```{r}
+umsatzdaten <- read_csv("umsatzdaten_gekuerzt.csv")
+
+```
+
+```{r}
+# Berechnung der Niederschlagstage
+
+wetter <- read_csv("wetter.csv")
+
+wetter$Wettercode[is.na(wetter$Wettercode)]<-0
+
+#Neue Variable - Regen/Kein Regen 
+
+wetter$Regen <- wetter$Wettercode
+wetter$Regen[wetter$Regen<80]<-0
+wetter$Regen[wetter$Regen>=80]<-1
+wetter$Regen[is.na(wetter$Regen)]<-1
+wetter_umsatz <- left_join(umsatzdaten,wetter)
+regen_umsatz <- wetter_umsatz[ -c(4,5,6,7) ]
+
+# Berechnung von Mittelwerten, Standardabweichungen, Standardfehlern und Konfidenzintervallen
+regen_umsatz$Regen[is.na(regen_umsatz$Regen)] <-0 
+
+if (regen_umsatz$Regen > 0) 
+  my_sum_1 <- regen_umsatz %>%
+    group_by(Warengruppe) %>%
+    summarise(
+      n=n(),
+      mean=mean(Umsatz),
+      sd=sd(Umsatz)
+    ) %>%
+    mutate( se=sd/sqrt(n))  %>%
+    mutate( ic=se * qt((1-0.05)/2 + .5, n-1))
+
+else 
+my_sum_0 <- regen_umsatz %>%
+    group_by(Warengruppe) %>%
+    summarise(
+      n=n(),
+      mean=mean(Umsatz),
+      sd=sd(Umsatz)
+    ) %>%
+    mutate( se=sd/sqrt(n))  %>%
+    mutate( ic=se * qt((1-0.05)/2 + .5, n-1))
+
+
+# Balkendiagramme
+diagramm_0<-(
+  ggplot(my_sum_0) +
+  geom_bar( aes(x=as.factor(Warengruppe), y=mean), stat="identity", fill="forestgreen", alpha=0.6) +
+  geom_errorbar( aes(x=Regen, ymin=mean-ic, ymax=mean+ic), width=0.4, colour="orange", alpha=0.9, size=1.5) +
+  ggtitle("Umsatz ohne Niederschlag mit Konfidenzintervallen") + ylab("Umsatz") + xlab("Warengruppen")
+)
+
+diagramm_1<-(
+  ggplot(my_sum_1) +
+  geom_bar( aes(x=as.factor(Warengruppe), y=mean), stat="identity", fill="forestgreen", alpha=0.6) +
+  geom_errorbar( aes(x=Regen, ymin=mean-ic, ymax=mean+ic), width=0.4, colour="orange", alpha=0.9, size=1.5) +
+  ggtitle("Umsatz der Warengruppen bei Regen mit Konfidenzintervallen") + ylab("Umsatz") + xlab("Warengruppen")
+)
+
+print(diagramm_01)
+print(diagramm_02)
+
+```
