@@ -47,20 +47,7 @@ vumsatz[is.na(vumsatz$Bewoelkung),]$Bewoelkung=-1
 vumsatz$Tag = yday(as.Date(vumsatz$Datum))
 #Testen, ob Datensatz NA enthält
 #View(vumsatz)
-any(is.na(vumsatz$Datum))
-any(is.na(vumsatz$Umsatz))
-any(is.na(vumsatz$Warengruppe))
-any(is.na(vumsatz$KielerWoche))
-
-any(is.na(vumsatz$Temperatur))
-any(is.na(vumsatz$Bewoelkung))
-any(is.na(vumsatz$Wettercode))
-any(is.na(vumsatz$Windgeschwindigkeit))
-any(is.na(vumsatz$Wochentag))
-any(is.na(vumsatz$Wetter))
-any(is.na(vumsatz$Tag))
-any(is.na(vumsatz$Feiertag))
-any(is.na(vumsatz$Feiertag_Ja))
+any(colSums(is.na(vumsatz)))
 
 data_predict=left_join(wetter,kiwo)
 data_predict=left_join(data_predict,umsatzdaten)
@@ -80,7 +67,7 @@ data_predict[is.na(data_predict$Umsatz),]$Umsatz=0
 data_predict[is.na(data_predict$Warengruppe),]$Warengruppe=0
 data_predict[is.na(data_predict$KielerWoche),]$KielerWoche<-0
 
-
+#Einfügen von Spalten mit relativer Temperaturabweichung
 
 temptest = vumsatz
 temptest$Jahr = year(as.Date(temptest$Datum))
@@ -127,7 +114,7 @@ data_predict$T_Abweichung = temptest$T_Abweichung
 ```
 ```{r}
 # Zufallszähler setzen (um die zufällige Partitionierung bei jedem Durchlauf gleich zu halten)
-set.seed(1)
+#set.seed(1)
 
 # Zufällige Ziehung Indizes für die Zeilen des Datensatzes, die dem Traininsdatensatz zugeordnet werden
 indices_train <- sample(seq_len(nrow(vumsatz)), size = floor(0.80 * nrow(vumsatz)))
@@ -138,29 +125,16 @@ umsatz_test <- vumsatz[-indices_train, ]
 
 
 #Verkleinerung des Datensatzes zu Testzwecken
-umsatz_train <- sample_frac(umsatz_train_org, .20)
-# warengruppe=1
-# umsatz_train=umsatz_train[umsatz_train$Warengruppe==warengruppe,]
-# umsatz_test=umsatz_test[umsatz_test$Warengruppe==warengruppe,]
+#umsatz_train <- sample_frac(umsatz_train_org, .50)
 ```
 
-
+###Errechnen des SVM
 ```{r}
-#Berechnen von linearem Modell
-# mod2 <-
-#   lm(
-#     Umsatz ~ as.factor(Feiertag_Ja) + Temperatur + as.factor(KielerWoche) + as.factor(Wochentag) +
-#       as.factor(Wetter) + Tag + Bewoelkung,
-#     umsatz_train
-#   )
-# 
-# mape(umsatz_train$Umsatz, predict(mod2, new_data = umsatz_train))
-
 #Berechnung des svm Modells
 svm_tune <-
   tune(
     svm,
-    Umsatz ~ as.factor(KielerWoche)+ as.factor(Wetter)*as.factor(Warengruppe) + Temperatur*as.factor(Warengruppe) + as.Date(Datum)*as.factor(Warengruppe)  + as.factor(Wochentag)*as.factor(Warengruppe)+T_Abweichung*as.factor(Warengruppe),
+    Umsatz ~ as.factor(KielerWoche)+ as.factor(Wetter)*as.factor(Warengruppe) + Temperatur*as.factor(Warengruppe)  + as.Date(Datum)*as.factor(Warengruppe)  +as.factor(Feiertag_Ja)*as.factor(Warengruppe)+ as.factor(Wochentag)*as.factor(Warengruppe)+T_Abweichung*as.factor(Warengruppe),
     data = umsatz_train,
     ranges = list(epsilon = seq(0.1, 1, 0.1), cost = 2 ^ (0:3))
   )
@@ -181,40 +155,38 @@ vumsatz_plot$svm <- predict(svm_tune$best.model, vumsatz_plot)
 ggplot(vumsatz_plot) + geom_point(aes(x = Datum, y = Umsatz, color = "red")) +
   geom_line(aes(x = Datum, y = svm))
 ```
+
+###Errechnen von MAPE und Umsatz
 ```{r}
 
-
-# mape(vumsatz[vumsatz$Warengruppe==2,]$Umsatz, predict(svm_tune$best.model, vumsatz)[vumsatz$Warengruppe==2])
-# mape(vumsatz[vumsatz$Warengruppe==3,]$Umsatz, predict(svm_tune$best.model, vumsatz)[vumsatz$Warengruppe==3])
-# mape(vumsatz[vumsatz$Warengruppe==4,]$Umsatz, predict(svm_tune$best.model, vumsatz)[vumsatz$Warengruppe==4])
-# mape(vumsatz[vumsatz$Warengruppe==5,]$Umsatz, predict(svm_tune$best.model, vumsatz)[vumsatz$Warengruppe==5])
-# mape(vumsatz[vumsatz$Warengruppe==6,]$Umsatz, predict(svm_tune$best.model, vumsatz)[vumsatz$Warengruppe==6])
-
-
- #Umsatz ~ as.factor(KielerWoche)+ as.factor(Wetter)*as.factor(Warengruppe) + Temperatur*as.factor(Warengruppe) + as.Date(Datum)*as.factor(Warengruppe)  + as.factor(Wochentag)*as.factor(Warengruppe),
- 
-
 dumsatz = NULL
-umsatz_error = NULL
+#umsatz_error = NULL
+test_error = NULL
 for(warengruppe in 1:5){
   gdata_predict=data_predict
   gdata_predict[gdata_predict$Warengruppe==0,]$Warengruppe=warengruppe
   #gdata_predict=subset(data_predict,select=c(Datum,Wetter,Warengruppe,KielerWoche,Temperatur,Wochentag,Umsatz))
   vumsatz1<-predict(svm_tune$best.model,gdata_predict)
   dumsatz=rbind(dumsatz,vumsatz1[gdata_predict$Datum=="2019-06-04"])
-  umsatz_error = rbind(umsatz_error,mape(vumsatz[vumsatz$Warengruppe==warengruppe,]$Umsatz, predict(svm_tune$best.model, vumsatz)[vumsatz$Warengruppe==warengruppe]))
+  #umsatz_error = rbind(umsatz_error,mape(vumsatz[vumsatz$Warengruppe==warengruppe,]$Umsatz, predict(svm_tune$best.model, vumsatz)[vumsatz$Warengruppe==warengruppe]))
+  test_error= rbind(test_error,mape(umsatz_test[umsatz_test$Warengruppe==warengruppe,]$Umsatz, predict(svm_tune$best.model, umsatz_test)[umsatz_test$Warengruppe==warengruppe]))
 }
 
-umsatz_error = rbind(umsatz_error,mape(vumsatz[vumsatz$Warengruppe==6,]$Umsatz, predict(svm_tune$best.model, vumsatz)[vumsatz$Warengruppe==6]))
+#umsatz_error = rbind(umsatz_error,mape(vumsatz[vumsatz$Warengruppe==6,]$Umsatz, predict(svm_tune$best.model, vumsatz)[vumsatz$Warengruppe==6]))
+test_error= rbind(test_error,mape(umsatz_test[umsatz_test$Warengruppe==6,]$Umsatz, predict(svm_tune$best.model, umsatz_test)[umsatz_test$Warengruppe==6]))
+
+write.csv(dumsatz, file = "dumsatz.csv")
+write.csv(test_error, file = "test_error.csv")
 ```
 
+### Plotten von MAPE
 ```{r}
 
 data <- data.frame(
   name=c(1,2,3,4,5,6),
-  value=umsatz_error
+  value=test_error
 )
-
+png("MAPE_svm.png")
 # Uniform color
 xx<-barplot(height=data$value, names=data$name, 
         col=rgb(0.8,0.1,0.1,0.6),
@@ -225,19 +197,22 @@ xx<-barplot(height=data$value, names=data$name,
         )
 
 text(x = xx, y = data$value, label = round(data$value,digits=2), pos = 3, cex = 0.8, col = "red")
-
+dev.off()
 ```
 
+### Plotten von Umsatz
 ```{r}
 # create a dataset
 Methode <- c(rep("svm" , 5) )
 Warengruppe <- rep(c("1" , "2" , "3", "4", "5"),1) 
 Wert <- dumsatz
-data <- data.frame(specie,Warengruppe,Wert)
+data <- data.frame(Methode,Warengruppe,Wert)
  
+png("Umsatz_svm.png")
 # Stacked
 ggplot(data, aes(fill=Warengruppe, y=Wert, x=Methode,label =round(Wert,digits=1))) + 
     geom_bar(position="stack", stat="identity")+
   geom_text(size = 3, position = position_stack(vjust = 0.5))
+dev.off()
 ```
 
