@@ -44,10 +44,6 @@ library(Metrics)
 
 ### Definition des Neuronalen Netzes
 ```{python}
-# Benoetigte Python Libraries einbinden
-#import sys
-#print(sys.path)
-#sys.path.append("numpy_path")
 
 import numpy as np
 import tensorflow as tf
@@ -67,7 +63,6 @@ model.compile(loss="mse",
 
 # Ausgabe einer Zusammenfassung zur Form des Modells, das geschaetzt wird (nicht notwendig)
 model.summary()
-
 
 ```
 
@@ -101,7 +96,6 @@ ggplot(data[-1,]) +
   xlab("Iteration Number") +
   ylab("Loss") 
 
-
 ```
 
 
@@ -130,14 +124,12 @@ test_predictions <- (test_predictions_norm * norm_values_list$sd[1]) + norm_valu
 predict_predictions <- (predict_predictions_norm * norm_values_list$sd[1]) + norm_values_list$mean[1]
 
 # Selektion der zugehörigen tatsächlichen Umsätze
-train_actuals <- numsatz$Umsatz[train_ind]
-test_actuals <- numsatz$Umsatz[-train_ind]
-
+train_actuals <- numsatz_subset$Umsatz[train_ind]
+test_actuals <- numsatz_subset$Umsatz[-train_ind]
 
 # Vergleich der Gütekriterien für die Traingings- und Testdaten
-cat(paste0("MAPE on the Training Data:\t", format(mape(train_actuals, train_predictions)*100, digits=3, nsmall=2)))
+#cat(paste0("MAPE on the Training Data:\t", format(mape(train_actuals, train_predictions)*100, digits=3, nsmall=2)))
 cat(paste0("\nMAPE on the Test Data:\t\t", format(mape(test_actuals, test_predictions)*100, digits=3, nsmall=2)))
-
 
 ```
 
@@ -150,7 +142,7 @@ data_train <- data.frame(prediction = train_predictions/1000, actual = train_act
 data_test <- data.frame(prediction = test_predictions/1000, actual = test_actuals/1000)
 
 # Plot der Ergebnisse der Trainingsdaten
-ggplot(data_train[1:7133,]) +
+ggplot(data_train[1:7129,]) +
   geom_line( aes(x=1:length(prediction), y=prediction, colour = "Predicted Values" )) +
   geom_line( aes(x=1:length(actual), y=actual, colour = "Actual Values" )) +
   scale_colour_manual( values = c("Predicted Values"="blue", "Actual Values"="red") ) +
@@ -159,14 +151,13 @@ ggplot(data_train[1:7133,]) +
   ylab("Umsatz in 1.000 EUR") 
 
 # Plot der Ergebnisse der Testdaten
-ggplot(data_test[1:3676,]) +
+ggplot(data_test[1:3674,]) +
   geom_line( aes(x=1:length(prediction), y=prediction, colour = "Predicted Values" )) +
   geom_line( aes(x=1:length(actual), y=actual, colour = "Actual Values" )) +
   scale_colour_manual( values = c("Predicted Values"="blue", "Actual Values"="red") ) +
   labs(title="Predicted and Actual Values for the Test Data") +
   xlab("Case Number") +
   ylab("Umsatz in 1.000 EUR") 
-
 
 ```
 
@@ -177,8 +168,5 @@ ggplot(data_test[1:3676,]) +
 for(i in 1:6){
   cat(paste0("\nVorhergesagter Umsatz - Warengruppe ", i, ":\t", format(predict_predictions[i], digits=2, nsmall =0)))
 }
-
-#cat(paste0("\nTatsächlicher Umsatz:\t", test_actuals[1]))
-
 
 ```
