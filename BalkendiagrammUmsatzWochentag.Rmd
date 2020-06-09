@@ -1,0 +1,49 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+---
+
+Einbinden ben?tigter Bibliotheken
+```{r}
+library(readr)
+library(lubridate)
+library(ggplot2)
+library(dplyr)
+
+```
+
+
+Einlesen der Umsatzdaten
+```{r}
+umsatzdaten <- read_csv("umsatzdaten_gekuerzt.csv")
+
+```
+
+```{r}
+umsatzdaten$Wochentag <- weekdays(as.Date(umsatzdaten$Datum))
+
+
+my_sum_1 <- umsatzdaten %>%
+     group_by(Wochentag) %>%
+   summarise(
+     n=n(),
+      mean=mean(Umsatz),
+      sd=sd(Umsatz)
+    ) %>%
+    mutate( se=sd/sqrt(n))  %>%
+    mutate( ic=se * qt((1-0.05)/2 + .5, n-1))
+
+ 
+# Balkendiagramme
+diagramm_1<-(
+  ggplot(my_sum_1) +
+  geom_bar( aes(x=as.factor(Wochentag), y=mean), stat="identity", fill="forestgreen", alpha=0.6) +
+  geom_errorbar( aes(x=Wochentag, ymin=mean-ic, ymax=mean+ic), width=0.4, colour="orange", alpha=0.9, size=1.5) +
+  ggtitle("Umsatz nach Wochentagen mit Konfidenzintervallen") + ylab("Umsatz in EUR") + xlab("Wochentage")
+)
+
+print(diagramm_1)
+
+```
