@@ -110,7 +110,7 @@ for(j in 1:7){
 }
 
 data_predict$T_Abweichung = temptest$T_Abweichung
-
+write.csv(vumsatz, file = "svm_Umsatz.csv")
 ```
 ```{r}
 # Zufallszähler setzen (um die zufällige Partitionierung bei jedem Durchlauf gleich zu halten)
@@ -175,8 +175,8 @@ for(warengruppe in 1:5){
 #umsatz_error = rbind(umsatz_error,mape(vumsatz[vumsatz$Warengruppe==6,]$Umsatz, predict(svm_tune$best.model, vumsatz)[vumsatz$Warengruppe==6]))
 test_error= rbind(test_error,mape(umsatz_test[umsatz_test$Warengruppe==6,]$Umsatz, predict(svm_tune$best.model, umsatz_test)[umsatz_test$Warengruppe==6]))
 
-write.csv(dumsatz, file = "dumsatz.csv")
-write.csv(test_error, file = "test_error.csv")
+write.csv(dumsatz, file = "svm_Umsatz_schaetzung.csv")
+write.csv(test_error, file = "svm_test_error.csv")
 ```
 
 ### Plotten von MAPE

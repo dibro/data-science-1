@@ -28,7 +28,7 @@ vumsatz=vumsatz[]
 vumsatz$Wetter <- 0
 vumsatz[is.na(vumsatz$Wettercode),]$Wetter = 1
 vumsatz$Wochentag <- weekdays(as.Date(vumsatz$Datum))
-View(vumsatz)
+#View(vumsatz)
 ```
 
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
